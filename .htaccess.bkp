@@ -1,0 +1,26 @@
+RewriteEngine on
+
+
+RewriteCond %{SCRIPT_FILENAME} !-d  
+RewriteCond %{SCRIPT_FILENAME} !-f  
+
+RewriteRule ^agencia/formacao_academica/$ 			/agencia/index.php[NC]
+RewriteRule ^agencia/conhecimentos/$ 				/agencia/index.php[NC]
+RewriteRule ^agencia/cargo_pretendido/$ 			/agencia/index.php[NC]
+RewriteRule ^agencia/dados_pessoais/$ 				/agencia/index.php[NC]
+RewriteRule ^agencia/dados_basicos/$ 				/agencia/index.php[NC]
+RewriteRule ^experiencia_profissional/$ 			/agencia/index.php[NC]
+RewriteRule ^experiencia_profissional/$ 	/agencia/index.php[NC]
+RewriteRule ^agencia/cadastro_estados/$ 			/agencia/index.php[NC]
+RewriteRule ^agencia/$ 								/agencia/index.php[NC]
+
+
+
+
+RewriteRule ^server/(.*)/(.*)/(.*)$ 		/agencia/index.php [NC]
+RewriteRule ^server/(.*)/(.*)/$ 			/agencia/index.php [NC]
+RewriteRule ^server/(.*)/(.*)$ 				/agencia/index.php [NC]
+RewriteRule ^server/(.*)$ 					/agencia/index.php [NC]
+
+
+ErrorDocument 404 /site/404.php
