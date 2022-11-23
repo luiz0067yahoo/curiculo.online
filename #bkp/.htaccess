@@ -1,0 +1,25 @@
+RewriteEngine on
+
+
+RewriteCond %{SCRIPT_FILENAME} !-d  
+RewriteCond %{SCRIPT_FILENAME} !-f  
+
+RewriteRule ^formacao_academica/$ 			index.php [L]
+RewriteRule ^adm/$               			index.php [L]
+RewriteRule ^conhecimentos/$ 				index.php [L]
+RewriteRule ^cargo_pretendido/$ 			index.php [L]
+RewriteRule ^dados_pessoais/$ 				index.php [L]
+RewriteRule ^dados_basicos/$ 				index.php [L]
+RewriteRule ^experiencia_profissional/$ 	index.php [L]
+RewriteRule ^cadastro_estados/$ 			index.php [L]
+
+
+
+
+RewriteRule ^server/(.*)/(.*)/(.*)$ 		index.php [NC]
+RewriteRule ^server/(.*)/(.*)/$ 			index.php [NC]
+RewriteRule ^server/(.*)/(.*)$ 				index.php [NC]
+RewriteRule ^server/(.*)$ 					index.php [NC]
+
+
+ErrorDocument 404 /site/404.php

@@ -1,0 +1,1 @@
+import e from"./FormNewUserView.d3d40694.js";import{_ as r}from"./FooterView.332af937.js";import{r as s,o as t,f as n}from"./index.c0618ea5.js";const c={components:{FormNewUserView:e}};function m(p,a,_,i,f,w){const o=s("FormNewUserView");return t(),n(o)}const V=r(c,[["render",m]]);export{V as default};

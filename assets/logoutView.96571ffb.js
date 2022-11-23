@@ -1,0 +1,1 @@
+import{_ as r,H as a,F as s}from"./FooterView.5f1cab5f.js";import{r as e,o as c,c as i,a as o,F as p}from"./index.d25fabf2.js";const _={components:{HeaderView:a,FooterView:s}};function l(m,d,u,V,f,w){const t=e("HeaderView"),n=e("FooterView");return c(),i(p,null,[o(t,{title:"Curiculo Online"}),o(n)],64)}const $=r(_,[["render",l]]);export{$ as default};

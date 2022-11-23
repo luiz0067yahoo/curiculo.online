@@ -4,22 +4,35 @@ RewriteEngine on
 RewriteCond %{SCRIPT_FILENAME} !-d  
 RewriteCond %{SCRIPT_FILENAME} !-f  
 
-RewriteRule ^formacao_academica/$ 			index.php [L]
-RewriteRule ^adm/$               			index.php [L]
-RewriteRule ^conhecimentos/$ 				index.php [L]
-RewriteRule ^cargo_pretendido/$ 			index.php [L]
-RewriteRule ^dados_pessoais/$ 				index.php [L]
-RewriteRule ^dados_basicos/$ 				index.php [L]
-RewriteRule ^experiencia_profissional/$ 	index.php [L]
-RewriteRule ^cadastro_estados/$ 			index.php [L]
+RewriteRule ^meta/$                         server/index.php [L]
+RewriteRule ^parceiros/$                    server/index.php [L]
+
+RewriteRule ^login/$                        server/index.php [L]
+RewriteRule ^logout/$                       server/index.php [L]
+RewriteRule ^adm/$               			server/index.php [L]
+
+RewriteRule ^novo_usuario/$      			server/index.php [L]
+RewriteRule ^dados_basicos/$ 				server/index.php [L]
+RewriteRule ^formacao_academica/$ 			server/index.php [L]
+RewriteRule ^conhecimentos/$ 				server/index.php [L]
+RewriteRule ^cargo_pretendido/$ 			server/index.php [L]
+RewriteRule ^experiencia_profissional/$ 	server/index.php [L]
+RewriteRule ^dados_pessoais/$ 				server/index.php [L]
+RewriteRule ^vagas/$                     	server/index.php [L]
+RewriteRule ^suas_vagas/$                   server/index.php [L]
+
+RewriteRule ^curriculum/$                   server/index.php [L]
+RewriteRule ^print_curriculum/$             server/index.php [L]
+
+RewriteRule ^cadastro_estados/$ 			server/index.php [L]
+RewriteRule ^cadastro_usuarios/$    		server/index.php [L]
+RewriteRule ^active_user/$           		server/index.php [L]
 
 
+RewriteRule ^server/(.*)/(.*)/(.*)$ 		server/index.php [NC]
+RewriteRule ^server/(.*)/(.*)/$ 			server/index.php [NC]
+RewriteRule ^server/(.*)/(.*)$ 				server/index.php [NC]
+RewriteRule ^server/(.*)$ 					server/index.php [NC]
 
 
-RewriteRule ^server/(.*)/(.*)/(.*)$ 		index.php [NC]
-RewriteRule ^server/(.*)/(.*)/$ 			index.php [NC]
-RewriteRule ^server/(.*)/(.*)$ 				index.php [NC]
-RewriteRule ^server/(.*)$ 					index.php [NC]
-
-
-ErrorDocument 404 /site/404.php
+ErrorDocument 404 /server/404.php[L]
