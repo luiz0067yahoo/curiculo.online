@@ -2,22 +2,22 @@
 	date_default_timezone_set("America/Sao_Paulo");
 	class connect {
 		public static $instance;
-		const         servername_		        =	"localhost";
-		const         username_		            =   "u455891610_root";
-		const         password_                 =	"9b=vo[bO";
-		const         database_                 =	"u455891610_cv";
+		const         servername_		        =	"";
+		const         username_		            =   "";
+		const         password_                 =	"";
+		const         database_                 =	"";
 		
-		const         smtp_server               =   "smtp.hostinger.com.br";
-		const         default_email	            =	"naoresponda@curiculo.online";
-		const         default_email_password	=	"]!xY/>Lv3";
+		const         smtp_server               =   "";
+		const         default_email	            =	"";
+		const         default_email_password	=	"";
 		
-		const         JWT_key	                =	"kTiD-pNY6-Uz$!Ri(0:q(Ctf;^{{^O";
-		const         time_session	            =	"+10 minutes";
+		const         JWT_key	                =	"";
+		const         time_session	            =	"";
 		
-		const         name_app_default	        =	"app curiculo online";
-		const         user_app_default	        =	"NUaRIenCoNordonetersErYonfISQuiS";
-		const         password_app_default	    =	"F0Fp>4klc8Fosy>|pW!,erxDq)JK$[Sn|XpSf#(I";
-		const         email_app_default	        =	"app@curiculo.online";
+		const         name_app_default	        =	"";
+		const         user_app_default	        =	"";
+		const         password_app_default	    =	"";
+		const         email_app_default	        =	"";
 		
 		private function __construct() {
 		}
