@@ -1,0 +1,16 @@
+FROM php:8.3-cli-alpine
+
+# Instalar extensões MySQL para o PDO
+RUN docker-php-ext-install pdo pdo_mysql
+
+WORKDIR /var/www/html
+
+# Copiar código-fonte da aplicação e banco 100% PHP
+COPY backend/ ./backend/
+COPY db/ ./db/
+COPY index.php ./index.php
+COPY router.php ./router.php
+
+EXPOSE 8000
+
+CMD ["php", "-S", "0.0.0.0:8000", "router.php"]

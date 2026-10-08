@@ -1,0 +1,49 @@
+# ==============================================================================
+# PODMAN POD DEFINITION - CURRICULO.ONLINE
+# Executável nativamente via: podman play kube curriculo-pod.yaml
+# ==============================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curriculo-pod
+  labels:
+    app: curriculo-online
+spec:
+  containers:
+    # 1. Banco de Dados MySQL
+    - name: mysql-db
+      image: docker.io/library/mysql:8.0
+      env:
+        - name: MYSQL_DATABASE
+          value: curriculo_online
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+      ports:
+        - containerPort: 3306
+          hostPort: 3306
+
+    # 2. Backend PHP RESTful
+    - name: backend-api
+      image: localhost/curriculo-backend:latest
+      env:
+        - name: DB_HOST
+          value: 127.0.0.1
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_NAME
+          value: curriculo_online
+        - name: DB_USER
+          value: root
+        - name: DB_PASS
+          value: root
+      ports:
+        - containerPort: 8000
+          hostPort: 8000
+
+    # 3. Frontend React Nginx SPA
+    - name: frontend-web
+      image: localhost/curriculo-frontend:latest
+      ports:
+        - containerPort: 80
+          hostPort: 3000

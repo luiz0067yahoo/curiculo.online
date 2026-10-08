@@ -1,0 +1,122 @@
+export const DEFAULT_STEPS = [
+  {
+    id: 1,
+    slug: 'dados_basicos',
+    titulo: 'Dados Básicos e Identificação',
+    subtitulo: 'Informações de contato e identificação civil',
+    descricao: 'Nome, gênero, data de nascimento, e-mail, telefones e redes sociais (conforme backup 0.1).',
+    ordem: 1,
+    obrigatoria: true,
+    ativo: true,
+    icone: 'User',
+    tipo_perfil: 'todos'
+  },
+  {
+    id: 2,
+    slug: 'identificadores_lattes',
+    titulo: 'Identificadores Acadêmicos & Lattes',
+    subtitulo: 'Endereço para acessar este CV, ID Lattes e ORCID',
+    descricao: 'ID Lattes CNPq, link institucional, ORCID ID, Scopus ID e nome em citações bibliográficas.',
+    ordem: 2,
+    obrigatoria: true,
+    ativo: true,
+    icone: 'Award',
+    tipo_perfil: 'lattes'
+  },
+  {
+    id: 3,
+    slug: 'formacao_academica',
+    titulo: 'Formação Acadêmica / Titulação',
+    subtitulo: 'Trajetória educacional completa da graduação ao pós-doutorado',
+    descricao: 'Graduação, especialização, mestrado, doutorado e pós-doutorado com orientador e anos.',
+    ordem: 3,
+    obrigatoria: true,
+    ativo: true,
+    icone: 'GraduationCap',
+    tipo_perfil: 'todos'
+  },
+  {
+    id: 4,
+    slug: 'atuacao_profissional',
+    titulo: 'Atuação Profissional & Trajetória',
+    subtitulo: 'Vínculos institucionais e experiência na carreira',
+    descricao: 'Resumo profissional, objetivos, empresas/universidades, regime de trabalho e atribuições.',
+    ordem: 4,
+    obrigatoria: true,
+    ativo: true,
+    icone: 'Briefcase',
+    tipo_perfil: 'todos'
+  },
+  {
+    id: 5,
+    slug: 'linhas_pesquisa',
+    titulo: 'Linhas de Pesquisa & Áreas de Atuação',
+    subtitulo: 'Classificação CNPq e áreas de especialidade científica',
+    descricao: 'Grandes áreas, áreas de avaliação, subáreas e especialidades de pesquisa.',
+    ordem: 5,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'Search',
+    tipo_perfil: 'lattes'
+  },
+  {
+    id: 6,
+    slug: 'producao_bibliografica',
+    titulo: 'Produção Bibliográfica & Científica',
+    subtitulo: 'Artigos em periódicos, livros, capítulos e eventos',
+    descricao: 'Publicações científicas no formato ABNT, com DOI, revista, Qualis e ano.',
+    ordem: 6,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'BookOpen',
+    tipo_perfil: 'lattes'
+  },
+  {
+    id: 7,
+    slug: 'projetos_pesquisa',
+    titulo: 'Projetos de Pesquisa & Extensão',
+    subtitulo: 'Projetos de pesquisa científica e fomento',
+    descricao: 'Projetos com órgãos de fomento (CNPq, CAPES, FAPESP), equipe e descrição.',
+    ordem: 7,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'FolderGit2',
+    tipo_perfil: 'lattes'
+  },
+  {
+    id: 8,
+    slug: 'conhecimentos_idiomas',
+    titulo: 'Idiomas & Conhecimentos',
+    subtitulo: 'Fluência em línguas e competências técnicas',
+    descricao: 'Idiomas com níveis de fluência (básico a fluente) e conhecimentos/ferramentas.',
+    ordem: 8,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'Languages',
+    tipo_perfil: 'todos'
+  },
+  {
+    id: 9,
+    slug: 'cargo_pretendido',
+    titulo: 'Área & Cargo Pretendido / Interesses',
+    subtitulo: 'Foco de carreira ou linha docente pretendida',
+    descricao: 'Áreas de interesse, cargos pretendidos e pretensão salarial/dedicação exclusiva.',
+    ordem: 9,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'Compass',
+    tipo_perfil: 'corporativo'
+  },
+  {
+    id: 10,
+    slug: 'dados_pessoais',
+    titulo: 'Dados Complementares & Endereço',
+    subtitulo: 'Endereço profissional/residencial e informações finais',
+    descricao: 'Estado civil, dependentes, disponibilidade para viagens e residência (do backup 0.1).',
+    ordem: 10,
+    obrigatoria: false,
+    ativo: true,
+    icone: 'Home',
+    tipo_perfil: 'todos'
+  }
+];

@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: curriculo_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: curriculo_online
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - curriculo_network
+
+  # 2. Backend PHP RESTful
+  backend:
+    build:
+      context: ..
+      dockerfile: devops/docker/Dockerfile.backend
+    container_name: curriculo_backend
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: curriculo_online
+      DB_USER: root
+      DB_PASS: root
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/var/www/html/backend
+      - ../db:/var/www/html/db
+    depends_on:
+      - db
+    networks:
+      - curriculo_network
+
+  # 3. Frontend React (Vite / Nginx)
+  frontend:
+    build:
+      context: ..
+      dockerfile: devops/docker/Dockerfile.frontend
+    container_name: curriculo_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - curriculo_network
+
+volumes:
+  mysql_data:
+
+networks:
+  curriculo_network:
+    driver: bridge

@@ -1,0 +1,143 @@
+[
+    {
+        "uuid": "e788d627146667ffc7f213abb939acbd",
+        "titulo": "Teste Lattes",
+        "nome_completo": "Dr. Leonardo",
+        "email": "",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Leonardo\"}}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Leonardo"
+            }
+        },
+        "criado_em": "2026-10-08 14:29:06",
+        "atualizado_em": "2026-10-08 14:29:06"
+    },
+    {
+        "uuid": "a148b375df4c5105ff2bdec90ba7f7cd",
+        "titulo": "Teste Unitário Lattes",
+        "nome_completo": "Dr. Teste Automatizado",
+        "email": "teste@pesquisa.online",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Teste Automatizado\",\"email\":\"teste@pesquisa.online\"},\"formacao_academica\":[{\"nivel\":\"Doutorado\",\"curso\":\"Computação\",\"instituicao\":\"USP\",\"ano_conclusao\":\"2024\"}]}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Teste Automatizado",
+                "email": "teste@pesquisa.online"
+            },
+            "formacao_academica": [
+                {
+                    "nivel": "Doutorado",
+                    "curso": "Computação",
+                    "instituicao": "USP",
+                    "ano_conclusao": "2024"
+                }
+            ]
+        },
+        "criado_em": "2026-10-08 14:39:38",
+        "atualizado_em": "2026-10-08 14:39:38"
+    },
+    {
+        "uuid": "9c708b620079b7e454e5511bab13b0ca",
+        "titulo": "Teste Unitário Lattes",
+        "nome_completo": "Dr. Teste Automatizado",
+        "email": "teste@pesquisa.online",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Teste Automatizado\",\"email\":\"teste@pesquisa.online\"},\"formacao_academica\":[{\"nivel\":\"Doutorado\",\"curso\":\"Computação\",\"instituicao\":\"USP\",\"ano_conclusao\":\"2024\"}]}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Teste Automatizado",
+                "email": "teste@pesquisa.online"
+            },
+            "formacao_academica": [
+                {
+                    "nivel": "Doutorado",
+                    "curso": "Computação",
+                    "instituicao": "USP",
+                    "ano_conclusao": "2024"
+                }
+            ]
+        },
+        "criado_em": "2026-10-08 14:43:56",
+        "atualizado_em": "2026-10-08 14:43:56"
+    },
+    {
+        "uuid": "40bbb730fc642bf4d1c2090fe80b4ff7",
+        "titulo": "Teste Unitário Lattes",
+        "nome_completo": "Dr. Teste Automatizado",
+        "email": "teste@pesquisa.online",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Teste Automatizado\",\"email\":\"teste@pesquisa.online\"},\"formacao_academica\":[{\"nivel\":\"Doutorado\",\"curso\":\"Computação\",\"instituicao\":\"USP\",\"ano_conclusao\":\"2024\"}]}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Teste Automatizado",
+                "email": "teste@pesquisa.online"
+            },
+            "formacao_academica": [
+                {
+                    "nivel": "Doutorado",
+                    "curso": "Computação",
+                    "instituicao": "USP",
+                    "ano_conclusao": "2024"
+                }
+            ]
+        },
+        "criado_em": "2026-10-08 15:00:00",
+        "atualizado_em": "2026-10-08 15:00:00"
+    },
+    {
+        "uuid": "533d12888eb3d8241c14008baed90287",
+        "titulo": "Teste Unitário Lattes",
+        "nome_completo": "Dr. Teste Automatizado",
+        "email": "teste@pesquisa.online",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Teste Automatizado\",\"email\":\"teste@pesquisa.online\"},\"formacao_academica\":[{\"nivel\":\"Doutorado\",\"curso\":\"Computação\",\"instituicao\":\"USP\",\"ano_conclusao\":\"2024\"}]}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Teste Automatizado",
+                "email": "teste@pesquisa.online"
+            },
+            "formacao_academica": [
+                {
+                    "nivel": "Doutorado",
+                    "curso": "Computação",
+                    "instituicao": "USP",
+                    "ano_conclusao": "2024"
+                }
+            ]
+        },
+        "criado_em": "2026-10-08 15:05:06",
+        "atualizado_em": "2026-10-08 15:05:06"
+    },
+    {
+        "uuid": "ea94e7f3473b906a05cfa6e1aefc7fdb",
+        "titulo": "Teste Unitário Lattes",
+        "nome_completo": "Dr. Teste Automatizado",
+        "email": "teste@pesquisa.online",
+        "modelo_slug": "lattes-tradicional",
+        "cor_tema": "#0f3a68",
+        "dados_json": "{\"dados_basicos\":{\"nome\":\"Dr. Teste Automatizado\",\"email\":\"teste@pesquisa.online\"},\"formacao_academica\":[{\"nivel\":\"Doutorado\",\"curso\":\"Computação\",\"instituicao\":\"USP\",\"ano_conclusao\":\"2024\"}]}",
+        "dados": {
+            "dados_basicos": {
+                "nome": "Dr. Teste Automatizado",
+                "email": "teste@pesquisa.online"
+            },
+            "formacao_academica": [
+                {
+                    "nivel": "Doutorado",
+                    "curso": "Computação",
+                    "instituicao": "USP",
+                    "ano_conclusao": "2024"
+                }
+            ]
+        },
+        "criado_em": "2026-10-08 15:13:48",
+        "atualizado_em": "2026-10-08 15:13:48"
+    }
+]

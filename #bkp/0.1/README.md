@@ -1,2 +1,0 @@
-# curiculo.online
- 

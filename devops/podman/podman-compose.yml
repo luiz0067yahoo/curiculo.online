@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: docker.io/library/mysql:8.0
+    container_name: podman_curriculo_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: curriculo_online
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - podman_mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: devops/docker/Dockerfile.backend
+    container_name: podman_curriculo_backend
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: curriculo_online
+      DB_USER: root
+      DB_PASS: root
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: devops/docker/Dockerfile.frontend
+    container_name: podman_curriculo_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  podman_mysql_data:
