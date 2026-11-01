@@ -10,16 +10,19 @@ export const TRANSLATIONS = {
       versionTag: 'v2.0 • PHP & React'
     },
     nav: {
-      wizard: 'Preenchimento (Wizard)',
+      wizard: 'Preenchimento',
       stages: 'Cadastro de Etapas',
-      models: 'Modelos Lattes',
+      models: 'Modelos de CV',
+      curriculo: 'Currículo',
       loadBackup: 'Dados Backup',
       loadBackupTitle: 'Carregar dados de exemplo acadêmicos e do backup',
       saveCv: 'Salvar CV',
       saving: 'Salvando...',
       lightMode: 'Modo Claro',
       darkMode: 'Modo Escuro',
-      selectLang: 'Selecionar Idioma'
+      selectLang: 'Selecionar Idioma',
+      loginGoogle: 'Entrar com Google',
+      logoutGoogle: 'Sair'
     },
     wizard: {
       stepOf: 'Passo {current} de {total}',
@@ -180,8 +183,8 @@ export const TRANSLATIONS = {
       printPdfTooltip: 'Imprimir ou Salvar em PDF (folha A4 otimizada)'
     },
     lattesTemplate: {
-      title: 'Currículo Lattes',
-      agencyHeader: 'Conselho Nacional de Desenvolvimento Científico e Tecnológico - CNPq',
+      title: 'Curriculum Vitae',
+      agencyHeader: '',
       lastUpdate: 'Data da última atualização:',
       idLattesLabel: 'ID Lattes:',
       citationLabel: 'Nome em citações:',
@@ -234,16 +237,19 @@ export const TRANSLATIONS = {
       versionTag: 'v2.0 • PHP & React'
     },
     nav: {
-      wizard: 'Form Wizard',
+      wizard: 'Fill Resume',
       stages: 'Stage Management',
-      models: 'Lattes Models',
+      models: 'CV Templates',
+      curriculo: 'Resume',
       loadBackup: 'Backup Data',
       loadBackupTitle: 'Load academic and backup sample data',
       saveCv: 'Save CV',
       saving: 'Saving...',
       lightMode: 'Light Mode',
       darkMode: 'Dark Mode',
-      selectLang: 'Select Language'
+      selectLang: 'Select Language',
+      loginGoogle: 'Sign in with Google',
+      logoutGoogle: 'Sign out'
     },
     wizard: {
       stepOf: 'Step {current} of {total}',
@@ -405,7 +411,7 @@ export const TRANSLATIONS = {
     },
     lattesTemplate: {
       title: 'Curriculum Lattes',
-      agencyHeader: 'National Council for Scientific and Technological Development - CNPq',
+      agencyHeader: '',
       lastUpdate: 'Last updated on:',
       idLattesLabel: 'Lattes ID:',
       citationLabel: 'Name in citations:',
@@ -458,16 +464,19 @@ export const TRANSLATIONS = {
       versionTag: 'v2.0 • PHP y React'
     },
     nav: {
-      wizard: 'Formulario (Wizard)',
+      wizard: 'Completar CV',
       stages: 'Gestión de Etapas',
-      models: 'Modelos Lattes',
+      models: 'Modelos de CV',
+      curriculo: 'Currículum',
       loadBackup: 'Datos Respaldo',
       loadBackupTitle: 'Cargar datos de ejemplo académicos y del respaldo',
       saveCv: 'Guardar CV',
       saving: 'Guardando...',
       lightMode: 'Modo Claro',
       darkMode: 'Modo Oscuro',
-      selectLang: 'Seleccionar Idioma'
+      selectLang: 'Seleccionar Idioma',
+      loginGoogle: 'Entrar con Google',
+      logoutGoogle: 'Cerrar sesión'
     },
     wizard: {
       stepOf: 'Paso {current} de {total}',
@@ -629,7 +638,7 @@ export const TRANSLATIONS = {
     },
     lattesTemplate: {
       title: 'Currículum Lattes',
-      agencyHeader: 'Consejo Nacional de Desarrollo Científico y Tecnológico - CNPq',
+      agencyHeader: '',
       lastUpdate: 'Última actualización:',
       idLattesLabel: 'ID Lattes:',
       citationLabel: 'Nombre en citas:',
@@ -682,16 +691,19 @@ export const TRANSLATIONS = {
       versionTag: 'v2.0 • PHP e React'
     },
     nav: {
-      wizard: 'Compilazione (Wizard)',
+      wizard: 'Compilazione',
       stages: 'Gestione Fasi',
-      models: 'Modelli Lattes',
+      models: 'Modelli di CV',
+      curriculo: 'Curriculum',
       loadBackup: 'Dati Backup',
       loadBackupTitle: 'Carica dati di esempio accademici e dal backup',
       saveCv: 'Salva CV',
       saving: 'Salvataggio...',
       lightMode: 'Modalità Chiara',
       darkMode: 'Modalità Scura',
-      selectLang: 'Seleziona Lingua'
+      selectLang: 'Seleziona Lingua',
+      loginGoogle: 'Accedi con Google',
+      logoutGoogle: 'Disconnetti'
     },
     wizard: {
       stepOf: 'Passo {current} di {total}',
@@ -853,7 +865,7 @@ export const TRANSLATIONS = {
     },
     lattesTemplate: {
       title: 'Curriculum Lattes',
-      agencyHeader: 'Consiglio Nazionale dello Sviluppo Scientifico e Tecnologico - CNPq',
+      agencyHeader: '',
       lastUpdate: 'Ultimo aggiornamento:',
       idLattesLabel: 'ID Lattes:',
       citationLabel: 'Nome nelle citazioni:',

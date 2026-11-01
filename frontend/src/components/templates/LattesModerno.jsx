@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../../i18n/I18nContext';
+import ProfilePhotoView from '../ProfilePhotoView';
 
 export default function LattesModerno({ data, themeColor = '#1e40af' }) {
   const { t } = useI18n();
@@ -15,15 +16,13 @@ export default function LattesModerno({ data, themeColor = '#1e40af' }) {
     dados_pessoais: dp = {}
   } = data || {};
 
-  const photo = dp.foto_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400';
-
   return (
     <div className="lattes-moderno" style={{ '--theme-color': themeColor }}>
       {/* Coluna Esquerda / Lateral */}
       <div className="sidebar">
-        {photo && (
-          <img src={photo} alt="Foto de perfil" className="sidebar-photo" />
-        )}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+          <ProfilePhotoView data={data} themeColor={themeColor} size={110} />
+        </div>
 
         <div>
           <div className="sidebar-title">{t('lattesTemplate.identificationTitle')}</div>

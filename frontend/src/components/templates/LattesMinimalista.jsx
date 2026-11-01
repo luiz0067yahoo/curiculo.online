@@ -1,7 +1,8 @@
 import React from 'react';
 import { useI18n } from '../../i18n/I18nContext';
+import ProfilePhotoView from '../ProfilePhotoView';
 
-export default function LattesMinimalista({ data }) {
+export default function LattesMinimalista({ data, themeColor = '#111827' }) {
   const { t } = useI18n();
 
   const {
@@ -14,10 +15,13 @@ export default function LattesMinimalista({ data }) {
 
   return (
     <div className="lattes-minimalista">
-      <div className="min-header">
-        <h1 className="min-title">{b.nome || 'Nome Completo'}</h1>
-        <div style={{ fontSize: '9pt', color: '#444', marginTop: 4 }}>
-          {b.email} • {b.celular || b.telefone} • {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} • {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'}
+      <div className="min-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <ProfilePhotoView data={data} themeColor={themeColor} size={82} />
+        <div>
+          <h1 className="min-title">{b.nome || 'Nome Completo'}</h1>
+          <div style={{ fontSize: '9pt', color: '#444', marginTop: 4 }}>
+            {b.email} • {b.celular || b.telefone} • {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} • {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'}
+          </div>
         </div>
       </div>
 

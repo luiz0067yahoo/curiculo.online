@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../../i18n/I18nContext';
+import ProfilePhotoView from '../ProfilePhotoView';
 
 export default function LattesTradicional({ data, themeColor = '#0f3a68' }) {
   const { t, language } = useI18n();
@@ -20,11 +21,10 @@ export default function LattesTradicional({ data, themeColor = '#0f3a68' }) {
 
   return (
     <div className="lattes-tradicional" style={{ '--theme-color': themeColor }}>
-      {/* Cabeçalho Institucional Padrão CNPq */}
+      {/* Cabeçalho do Modelo Vitae */}
       <div className="cnpq-header-bar">
         <div>
           <div className="cnpq-badge-title">{t('lattesTemplate.title')}</div>
-          <div className="cnpq-sub-header">{t('lattesTemplate.agencyHeader')}</div>
         </div>
         <div style={{ textAlign: 'right', fontSize: '8pt', color: '#64748b' }}>
           <div>{t('lattesTemplate.lastUpdate')} {new Date().toLocaleDateString(dateLocale)}</div>
@@ -32,22 +32,27 @@ export default function LattesTradicional({ data, themeColor = '#0f3a68' }) {
         </div>
       </div>
 
-      {/* Nome e Dados Cadastrais */}
-      <div className="lattes-name-title">{b.nome || 'Nome Completo do Pesquisador'}</div>
-      
-      <div className="lattes-meta-grid">
-        <div><strong>{t('lattesTemplate.citationLabel')}</strong> {lat.citacoes_bibliograficas || b.nome}</div>
-        <div><strong>{t('lattesTemplate.emailLabel')}</strong> {b.email || '—'}</div>
-        <div><strong>{t('lattesTemplate.orcidLabel')}</strong> {lat.orcid || '—'}</div>
-        <div><strong>{t('lattesTemplate.phoneLabel')}</strong> {b.celular || b.telefone || '—'}</div>
-        {lat.link_lattes && (
-          <div style={{ gridColumn: 'span 2' }}>
-            <strong>{t('lattesTemplate.addressUrlLabel')}</strong>{' '}
-            <a href={lat.link_lattes} target="_blank" rel="noreferrer" style={{ color: themeColor }}>
-              {lat.link_lattes}
-            </a>
+      {/* Nome, Dados Cadastrais e Foto Circular */}
+      <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', marginBottom: 14 }}>
+        <ProfilePhotoView data={data} themeColor={themeColor} size={92} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="lattes-name-title" style={{ marginTop: 0 }}>{b.nome || 'Nome Completo do Pesquisador'}</div>
+          
+          <div className="lattes-meta-grid">
+            <div><strong>{t('lattesTemplate.citationLabel')}</strong> {lat.citacoes_bibliograficas || b.nome}</div>
+            <div><strong>{t('lattesTemplate.emailLabel')}</strong> {b.email || '—'}</div>
+            <div><strong>{t('lattesTemplate.orcidLabel')}</strong> {lat.orcid || '—'}</div>
+            <div><strong>{t('lattesTemplate.phoneLabel')}</strong> {b.celular || b.telefone || '—'}</div>
+            {lat.link_lattes && (
+              <div style={{ gridColumn: 'span 2' }}>
+                <strong>{t('lattesTemplate.addressUrlLabel')}</strong>{' '}
+                <a href={lat.link_lattes} target="_blank" rel="noreferrer" style={{ color: themeColor }}>
+                  {lat.link_lattes}
+                </a>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Resumo Acadêmico */}

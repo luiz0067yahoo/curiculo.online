@@ -1,11 +1,11 @@
 export const RESUME_MODELS = [
   {
     id: 1,
-    slug: 'lattes-tradicional',
-    nome: 'Lattes Tradicional (Padrão CNPq)',
-    descricao: 'Estrutura formal canônica idêntica à Plataforma Lattes / CNPq oficial. Cabeçalho institucional, dados cadastrais, resumo biográfico em texto contínuo, formação acadêmica com orientadores e citações ABNT.',
-    categoria: 'Lattes / Acadêmico',
-    badge: 'Oficial CNPq',
+    slug: 'modelo-vitae',
+    nome: 'Modelo Vitae (Curriculum Vitae)',
+    descricao: 'Estrutura formal canônica do Modelo Vitae / Curriculum Vitae oficial. Cabeçalho institucional, foto de perfil circular com aro, dados cadastrais, resumo biográfico em texto contínuo, formação acadêmica, experiências e produções com citações ABNT.',
+    categoria: 'Curriculum Vitae',
+    badge: 'Modelo Vitae',
     corPadrao: '#0f3a68',
     previewIcon: 'FileCheck'
   },

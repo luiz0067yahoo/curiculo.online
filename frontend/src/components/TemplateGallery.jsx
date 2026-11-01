@@ -30,7 +30,7 @@ export default function TemplateGallery({ selectedModelSlug, onSelectModel, onSw
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 16 }}>
         {RESUME_MODELS.map(modelo => {
           const isSelected = selectedModelSlug === modelo.slug;
           const Icon = iconMap[modelo.previewIcon] || FileCheck;

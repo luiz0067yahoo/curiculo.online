@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../../i18n/I18nContext';
+import ProfilePhotoView from '../ProfilePhotoView';
 
 export default function LattesHibrido({ data, themeColor = '#334155' }) {
   const { t } = useI18n();
@@ -18,16 +19,19 @@ export default function LattesHibrido({ data, themeColor = '#334155' }) {
   return (
     <div className="lattes-hibrido" style={{ '--theme-color': themeColor }}>
       {/* Header Corporativo / Acadêmico */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0f172a', paddingBottom: 14, marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: '18pt', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-            {b.nome || 'Nome Completo'}
-          </h1>
-          <div style={{ fontSize: '10.5pt', fontWeight: 600, color: themeColor, marginTop: 4 }}>
-            {cp.cargo_pretendido || 'Pesquisa Aplicada & Liderança Tecnológica'}
-          </div>
-          <div style={{ fontSize: '8.5pt', color: '#64748b', marginTop: 4 }}>
-            {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} • {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'} • {b.email} • {b.celular || b.telefone}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, borderBottom: '2px solid #0f172a', paddingBottom: 14, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <ProfilePhotoView data={data} themeColor={themeColor} size={84} />
+          <div>
+            <h1 style={{ fontSize: '18pt', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+              {b.nome || 'Nome Completo'}
+            </h1>
+            <div style={{ fontSize: '10.5pt', fontWeight: 600, color: themeColor, marginTop: 4 }}>
+              {cp.cargo_pretendido || 'Pesquisa Aplicada & Liderança Tecnológica'}
+            </div>
+            <div style={{ fontSize: '8.5pt', color: '#64748b', marginTop: 4 }}>
+              {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} • {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'} • {b.email} • {b.celular || b.telefone}
+            </div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>

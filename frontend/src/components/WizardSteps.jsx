@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -15,9 +15,13 @@ import {
   FolderGit2, 
   Languages, 
   Compass, 
-  Home 
+  Home,
+  Eye,
+  Palette
 } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
+import ProfilePhotoEditor from './ProfilePhotoEditor';
+import { COLOR_PALETTE } from './ResumePreview';
 
 const iconMap = {
   User,
@@ -37,11 +41,26 @@ export default function WizardSteps({
   formData, 
   setFormData, 
   onGenerateLattesSummary, 
-  isGeneratingSummary 
+  isGeneratingSummary,
+  themeColor,
+  setThemeColor,
+  onViewResume 
 }) {
   const { t } = useI18n();
   const activeEtapas = etapas.filter(e => e.ativo);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
+  const stepperRef = useRef(null);
+  const activeStepRef = useRef(null);
+
+  useEffect(() => {
+    if (activeStepRef.current && stepperRef.current) {
+      activeStepRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [currentStepIdx]);
 
   const currentEtapa = activeEtapas[currentStepIdx] || activeEtapas[0];
   const totalSteps = activeEtapas.length;
@@ -83,28 +102,32 @@ export default function WizardSteps({
 
   return (
     <div className="card-panel">
-      {/* Stepper Superior */}
-      <div className="wizard-stepper">
+      {/* Stepper Superior: cada aba exibe somente o número exceto a aba atual que exibe o texto */}
+      <div className="wizard-stepper" ref={stepperRef}>
         {activeEtapas.map((step, idx) => {
           const isActive = idx === currentStepIdx;
-          const isDone = idx < currentStepIdx;
 
           return (
             <div
               key={step.id || step.slug}
-              className={`wizard-step-item ${isActive ? 'active' : ''}`}
+              ref={isActive ? activeStepRef : null}
+              className={`wizard-step-item ${isActive ? 'active' : 'num-only'}`}
               onClick={() => setCurrentStepIdx(idx)}
-              title={step.titulo}
+              title={`${idx + 1}. ${step.titulo}`}
+              role="tab"
+              aria-selected={isActive}
             >
               <div className="step-num">
-                {isDone ? <Check size={14} /> : idx + 1}
+                {idx + 1}
               </div>
-              <div style={{ overflow: 'hidden' }}>
-                <div className="step-label">{step.titulo}</div>
-                <div className="step-sub">
-                  {t('wizard.stepOf', { current: idx + 1, total: totalSteps })}
+              {isActive && (
+                <div className="step-info" style={{ overflow: 'hidden' }}>
+                  <div className="step-label">{step.titulo}</div>
+                  <div className="step-sub">
+                    {t('wizard.stepOf', { current: idx + 1, total: totalSteps })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })}
@@ -132,6 +155,102 @@ export default function WizardSteps({
         {/* 1. DADOS BÁSICOS */}
         {currentEtapa?.slug === 'dados_basicos' && (
           <div>
+            {/* Foto de Perfil com Enquadramento, Zoom e Movimento */}
+            <div style={{ marginBottom: 18 }}>
+              <ProfilePhotoEditor
+                themeColor={themeColor}
+                photoData={{
+                  foto_url: formData.dados_basicos?.foto_url || formData.dados_pessoais?.foto_url,
+                  foto_zoom: formData.dados_basicos?.foto_zoom ?? formData.dados_pessoais?.foto_zoom ?? 1,
+                  foto_x: formData.dados_basicos?.foto_x ?? formData.dados_pessoais?.foto_x ?? 0,
+                  foto_y: formData.dados_basicos?.foto_y ?? formData.dados_pessoais?.foto_y ?? 0,
+                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true
+                }}
+                onChange={(newPhoto) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    dados_basicos: {
+                      ...(prev.dados_basicos || {}),
+                      ...newPhoto
+                    },
+                    dados_pessoais: {
+                      ...(prev.dados_pessoais || {}),
+                      ...newPhoto
+                    }
+                  }));
+                }}
+              />
+            </div>
+
+            {/* Paleta de Cores do Currículo (incluindo Rosa e personalização) */}
+            {setThemeColor && (
+              <div style={{ marginBottom: 18, background: 'var(--bg-tertiary)', padding: '12px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
+                  <label className="form-label" style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Palette size={16} style={{ color: themeColor }} /> Cor de Destaque do Currículo
+                  </label>
+                  <span style={{ fontSize: '0.75rem', color: themeColor, fontWeight: 700, background: `${themeColor}18`, padding: '2px 8px', borderRadius: '12px' }}>
+                    {themeColor}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                  {COLOR_PALETTE.map(c => {
+                    const isSelected = themeColor?.toLowerCase() === c.hex.toLowerCase();
+                    return (
+                      <div
+                        key={c.hex}
+                        className={`color-dot ${isSelected ? 'active' : ''}`}
+                        style={{
+                          backgroundColor: c.hex,
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          cursor: 'pointer',
+                          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                          border: isSelected ? '2px solid #fff' : '1px solid rgba(0,0,0,0.15)',
+                          boxShadow: isSelected ? '0 0 0 2px var(--accent)' : 'none',
+                          transform: isSelected ? 'scale(1.15)' : 'scale(1)'
+                        }}
+                        onClick={() => setThemeColor(c.hex)}
+                        title={c.name}
+                      />
+                    );
+                  })}
+                  {/* Seletor Customizado / Qualquer Cor */}
+                  <label 
+                    className="color-dot"
+                    style={{
+                      backgroundColor: themeColor,
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(0,0,0,0.2)'
+                    }}
+                    title="Escolher qualquer outra cor personalizada"
+                  >
+                    <input 
+                      type="color" 
+                      value={themeColor || '#0f3a68'} 
+                      onChange={(e) => setThemeColor(e.target.value)}
+                      style={{
+                        position: 'absolute',
+                        opacity: 0,
+                        width: '100%',
+                        height: '100%',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <span style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>+</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
             <div className="form-group">
               <label className="form-label required">{t('fields.fullName')}</label>
               <input
@@ -304,7 +423,7 @@ export default function WizardSteps({
             </div>
 
             <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
                 <label className="form-label required" style={{ margin: 0 }}>
                   {t('fields.academicSummary')}
                 </label>
@@ -969,7 +1088,7 @@ export default function WizardSteps({
               {t('wizard.techSkills')}
             </h4>
             {(formData.conhecimentos_idiomas?.conhecimentos || []).map((item, idx) => (
-              <div key={item.id || idx} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'center' }}>
+              <div key={item.id || idx} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   type="text"
                   className="form-control"
@@ -1107,17 +1226,31 @@ export default function WizardSteps({
                   onChange={e => handleChange('dados_pessoais', 'filhos', e.target.value)}
                 />
               </div>
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">{t('fields.photoUrl')}</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="https://exemplo.com/foto.jpg"
-                  value={formData.dados_pessoais?.foto_url || ''}
-                  onChange={e => handleChange('dados_pessoais', 'foto_url', e.target.value)}
-                />
-              </div>
+            <div style={{ marginBottom: 18 }}>
+              <ProfilePhotoEditor
+                photoData={{
+                  foto_url: formData.dados_basicos?.foto_url || formData.dados_pessoais?.foto_url,
+                  foto_zoom: formData.dados_basicos?.foto_zoom ?? formData.dados_pessoais?.foto_zoom ?? 1,
+                  foto_x: formData.dados_basicos?.foto_x ?? formData.dados_pessoais?.foto_x ?? 0,
+                  foto_y: formData.dados_basicos?.foto_y ?? formData.dados_pessoais?.foto_y ?? 0,
+                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true
+                }}
+                onChange={(newPhoto) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    dados_basicos: {
+                      ...(prev.dados_basicos || {}),
+                      ...newPhoto
+                    },
+                    dados_pessoais: {
+                      ...(prev.dados_pessoais || {}),
+                      ...newPhoto
+                    }
+                  }));
+                }}
+              />
             </div>
 
             <div className="form-row" style={{ marginTop: 8, marginBottom: 16 }}>
@@ -1225,8 +1358,8 @@ export default function WizardSteps({
 
       </div>
 
-      {/* Barra Inferior com Navegação Anterior / Próximo */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-color)' }}>
+      {/* Barra Inferior com Navegação Anterior / Próximo e Acesso ao Currículo */}
+      <div className="wizard-nav-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: 10 }}>
         <button
           type="button"
           className="btn btn-secondary"
@@ -1236,17 +1369,36 @@ export default function WizardSteps({
           <ChevronLeft size={16} /> {t('wizard.prevStep')}
         </button>
 
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          {t('wizard.stepProgress', { current: currentStepIdx + 1, total: totalSteps })}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            {t('wizard.stepProgress', { current: currentStepIdx + 1, total: totalSteps })}
+          </div>
+
+          {onViewResume && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.82rem', padding: '6px 12px' }}
+              onClick={onViewResume}
+              title="Ir para a aba Currículo"
+            >
+              <Eye size={15} style={{ color: 'var(--accent)' }} /> <span>Ver Currículo</span>
+            </button>
+          )}
         </div>
 
         <button
           type="button"
           className="btn btn-primary"
-          onClick={() => setCurrentStepIdx(prev => Math.min(totalSteps - 1, prev + 1))}
-          disabled={currentStepIdx === totalSteps - 1}
+          onClick={() => {
+            if (currentStepIdx === totalSteps - 1 && onViewResume) {
+              onViewResume();
+            } else {
+              setCurrentStepIdx(prev => Math.min(totalSteps - 1, prev + 1));
+            }
+          }}
         >
-          {t('wizard.nextStep')} <ChevronRight size={16} />
+          {currentStepIdx === totalSteps - 1 ? 'Ver Currículo Final' : t('wizard.nextStep')} <ChevronRight size={16} />
         </button>
       </div>
     </div>

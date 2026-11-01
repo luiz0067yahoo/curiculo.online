@@ -4,19 +4,42 @@ import WizardSteps from './components/WizardSteps';
 import EtapasManager from './components/EtapasManager';
 import TemplateGallery from './components/TemplateGallery';
 import ResumePreview from './components/ResumePreview';
+import AuthScreen from './components/AuthScreen';
 
 import { apiService } from './services/api';
 import { DEFAULT_STEPS } from './data/defaultSteps';
-import { SAMPLE_RESUME_DATA } from './data/sampleResumeData';
+import { EMPTY_RESUME_DATA, SAMPLE_RESUME_DATA } from './data/sampleResumeData';
 import { useI18n } from './i18n/I18nContext';
 
 export default function App() {
   const { t } = useI18n();
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('curriculo_auth_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (
+          parsed?.name === 'Dr. Leonardo Albuquerque Silveira' || 
+          parsed?.name === 'Dra. Camila Vasconcelos Mendes' ||
+          parsed?.email === 'leonardo.silveira@usp.br' ||
+          parsed?.email === 'camila.mendes@cnpq.br'
+        ) {
+          localStorage.removeItem('curriculo_auth_user');
+          localStorage.removeItem('curriculo_google_user');
+          return null;
+        }
+        return parsed;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [activeTab, setActiveTab] = useState('wizard');
   const [theme, setTheme] = useState(() => localStorage.getItem('curriculo_theme') || 'light');
   const [etapas, setEtapas] = useState(DEFAULT_STEPS);
-  const [formData, setFormData] = useState(SAMPLE_RESUME_DATA);
-  const [selectedModelSlug, setSelectedModelSlug] = useState('lattes-tradicional');
+  const [formData, setFormData] = useState(EMPTY_RESUME_DATA);
+  const [selectedModelSlug, setSelectedModelSlug] = useState('modelo-vitae');
   const [themeColor, setThemeColor] = useState('#0f3a68');
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -40,9 +63,14 @@ export default function App() {
       // Carregar currículo salvo previamente se existir
       const savedCurriculo = await apiService.getCurriculoSalvo();
       if (savedCurriculo && savedCurriculo.dados) {
-        setFormData(savedCurriculo.dados);
-        if (savedCurriculo.modelo_slug) setSelectedModelSlug(savedCurriculo.modelo_slug);
-        if (savedCurriculo.cor_tema) setThemeColor(savedCurriculo.cor_tema);
+        const isOldSample = savedCurriculo.dados?.dados_basicos?.nome === 'Dr. Leonardo Albuquerque Silveira';
+        if (!isOldSample) {
+          setFormData(savedCurriculo.dados);
+          if (savedCurriculo.modelo_slug) setSelectedModelSlug(savedCurriculo.modelo_slug);
+          if (savedCurriculo.cor_tema) setThemeColor(savedCurriculo.cor_tema);
+        } else {
+          localStorage.removeItem('curriculo_saved_data');
+        }
       }
 
       // Verificar status da API PHP
@@ -68,9 +96,17 @@ export default function App() {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const handleClearForm = () => {
+    if (window.confirm('Tem certeza de que deseja limpar todos os campos do currículo?')) {
+      setFormData(EMPTY_RESUME_DATA);
+      localStorage.removeItem('curriculo_saved_data');
+      showToast('Todos os campos foram limpos com sucesso!');
+    }
+  };
+
   const handleLoadSampleData = () => {
-    setFormData(SAMPLE_RESUME_DATA);
-    showToast(t('toasts.sampleLoaded'));
+    setFormData(EMPTY_RESUME_DATA);
+    showToast('Campos limpos!');
   };
 
   const handleSaveBackend = async () => {
@@ -138,6 +174,66 @@ export default function App() {
     }
   };
 
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        dados_basicos: {
+          ...(prev.dados_basicos || {}),
+          nome: user.name || prev.dados_basicos?.nome,
+          email: user.email || prev.dados_basicos?.email,
+          foto_url: user.avatar || prev.dados_basicos?.foto_url,
+          foto_exibir: true
+        },
+        dados_pessoais: {
+          ...(prev.dados_pessoais || {}),
+          foto_url: user.avatar || prev.dados_pessoais?.foto_url,
+          foto_exibir: true
+        }
+      }));
+      showToast(`Bem-vindo, ${user.name}!`);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('curriculo_auth_user');
+    localStorage.removeItem('curriculo_google_user');
+    setCurrentUser(null);
+    showToast('Sessão encerrada com sucesso.');
+  };
+
+  const handleApplyGoogleProfile = (googleUser) => {
+    if (!googleUser) return;
+    setFormData(prev => ({
+      ...prev,
+      dados_basicos: {
+        ...(prev.dados_basicos || {}),
+        nome: googleUser.name || prev.dados_basicos?.nome,
+        email: googleUser.email || prev.dados_basicos?.email,
+        foto_url: googleUser.avatar || prev.dados_basicos?.foto_url,
+        foto_exibir: true
+      },
+      dados_pessoais: {
+        ...(prev.dados_pessoais || {}),
+        foto_url: googleUser.avatar || prev.dados_pessoais?.foto_url,
+        foto_exibir: true
+      }
+    }));
+    showToast(`Perfil atualizado: ${googleUser.name}`);
+  };
+
+  // Se o usuário ainda não estiver autenticado, a PRIMEIRA TELA é o login do Google / Cadastro
+  if (!currentUser) {
+    return (
+      <AuthScreen
+        onLoginSuccess={handleAuthSuccess}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Toast Notification */}
@@ -172,9 +268,13 @@ export default function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         onLoadSampleData={handleLoadSampleData}
+        onClearForm={handleClearForm}
         onSaveBackend={handleSaveBackend}
         isSaving={isSaving}
         storageMode={storageMode}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onApplyGoogleProfile={handleApplyGoogleProfile}
       />
 
       {/* Conteúdo Principal */}
@@ -187,9 +287,31 @@ export default function App() {
               setFormData={setFormData}
               onGenerateLattesSummary={handleGenerateSummary}
               isGeneratingSummary={isGeneratingSummary}
+              themeColor={themeColor}
+              setThemeColor={setThemeColor}
+              onViewResume={() => setActiveTab('curriculo')}
             />
             <ResumePreview
               formData={formData}
+              setFormData={setFormData}
+              selectedModelSlug={selectedModelSlug}
+              setSelectedModelSlug={setSelectedModelSlug}
+              themeColor={themeColor}
+              setThemeColor={setThemeColor}
+              onImportJson={(imported) => {
+                setFormData(imported);
+                showToast(t('toasts.importedSuccess'));
+              }}
+            />
+          </div>
+        )}
+
+        {/* 4. Última Aba: Currículo Atual Completo */}
+        {activeTab === 'curriculo' && (
+          <div className="curriculo-tab-view" style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+            <ResumePreview
+              formData={formData}
+              setFormData={setFormData}
               selectedModelSlug={selectedModelSlug}
               setSelectedModelSlug={setSelectedModelSlug}
               themeColor={themeColor}

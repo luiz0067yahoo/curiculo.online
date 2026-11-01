@@ -1,5 +1,6 @@
 import React from 'react';
 import { useI18n } from '../../i18n/I18nContext';
+import ProfilePhotoView from '../ProfilePhotoView';
 
 export default function LattesResumido({ data, themeColor = '#0f766e' }) {
   const { t } = useI18n();
@@ -16,8 +17,9 @@ export default function LattesResumido({ data, themeColor = '#0f766e' }) {
   return (
     <div className="lattes-resumido" style={{ '--theme-color': themeColor }}>
       {/* Box Superior Compacto */}
-      <div className="header-box">
-        <div>
+      <div className="header-box" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <ProfilePhotoView data={data} themeColor="#ffffff" size={68} />
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h2 style={{ fontSize: '15pt', margin: 0, fontWeight: 800 }}>{b.nome || 'Pesquisador'}</h2>
           <div style={{ fontSize: '8.5pt', opacity: 0.9 }}>
             {formacoes[0]?.curso} | {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} | {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'}
