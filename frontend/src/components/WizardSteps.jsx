@@ -164,7 +164,9 @@ export default function WizardSteps({
                   foto_zoom: formData.dados_basicos?.foto_zoom ?? formData.dados_pessoais?.foto_zoom ?? 1,
                   foto_x: formData.dados_basicos?.foto_x ?? formData.dados_pessoais?.foto_x ?? 0,
                   foto_y: formData.dados_basicos?.foto_y ?? formData.dados_pessoais?.foto_y ?? 0,
-                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true
+                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true,
+                  foto_formato: formData.dados_basicos?.foto_formato || formData.dados_pessoais?.foto_formato || 'circulo',
+                  foto_aro: formData.dados_basicos?.foto_aro ?? formData.dados_pessoais?.foto_aro ?? true
                 }}
                 onChange={(newPhoto) => {
                   setFormData(prev => ({
@@ -1235,7 +1237,9 @@ export default function WizardSteps({
                   foto_zoom: formData.dados_basicos?.foto_zoom ?? formData.dados_pessoais?.foto_zoom ?? 1,
                   foto_x: formData.dados_basicos?.foto_x ?? formData.dados_pessoais?.foto_x ?? 0,
                   foto_y: formData.dados_basicos?.foto_y ?? formData.dados_pessoais?.foto_y ?? 0,
-                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true
+                  foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true,
+                  foto_formato: formData.dados_basicos?.foto_formato || formData.dados_pessoais?.foto_formato || 'circulo',
+                  foto_aro: formData.dados_basicos?.foto_aro ?? formData.dados_pessoais?.foto_aro ?? true
                 }}
                 onChange={(newPhoto) => {
                   setFormData(prev => ({

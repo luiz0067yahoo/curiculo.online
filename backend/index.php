@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config/Database.php';
+require_once __DIR__ . '/models/User.php';
 require_once __DIR__ . '/models/Etapa.php';
 require_once __DIR__ . '/models/Modelo.php';
 require_once __DIR__ . '/models/Curriculo.php';
@@ -17,6 +18,16 @@ require_once __DIR__ . '/models/Curriculo.php';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 $body = json_decode(file_get_contents('php://input'), true) ?? [];
+
+// Extrair Bearer Token se enviado no header Authorization
+function getBearerToken(): string {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    $auth = $headers['Authorization'] ?? ($headers['authorization'] ?? ($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+    if (preg_match('/Bearer\s+(.+)$/i', $auth, $m)) {
+        return trim($m[1]);
+    }
+    return trim($_GET['token'] ?? ($GLOBALS['body']['token'] ?? ''));
+}
 
 // Helper para resposta JSON
 function jsonResponse($data, int $status = 200) {
@@ -32,10 +43,75 @@ try {
         jsonResponse([
             'status' => 'online',
             'app' => 'Curriculo Online Lattes API',
-            'version' => '2.0.0',
+            'version' => '2.1.0',
             'database_connected' => !Database::isFallback(),
             'storage_mode' => Database::isFallback() ? 'local_resilient_json' : 'mysql_pdo'
         ]);
+    }
+
+    // 1.1 AUTENTICAÇÃO (Cadastro, Login com E-mail/Senha e Login/Cadastro com Conta Google)
+    if (preg_match('#^/api/auth/register/?$#', $uri) && $method === 'POST') {
+        try {
+            $user = UserModel::register($body);
+            $curriculo = CurriculoModel::getByUser($user['id'] ?? null, $user['email'] ?? null);
+            jsonResponse([
+                'success' => true,
+                'user' => $user,
+                'curriculo' => $curriculo
+            ], 201);
+        } catch (InvalidArgumentException $e) {
+            jsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    if (preg_match('#^/api/auth/login/?$#', $uri) && $method === 'POST') {
+        try {
+            $email = $body['email'] ?? '';
+            $password = $body['password'] ?? ($body['senha'] ?? '');
+            $user = UserModel::login($email, $password);
+            $curriculo = CurriculoModel::getByUser($user['id'] ?? null, $user['email'] ?? null);
+            jsonResponse([
+                'success' => true,
+                'user' => $user,
+                'curriculo' => $curriculo
+            ]);
+        } catch (InvalidArgumentException $e) {
+            jsonResponse(['success' => false, 'error' => $e->getMessage()], 401);
+        }
+    }
+
+    if (preg_match('#^/api/auth/google/?$#', $uri) && $method === 'POST') {
+        try {
+            $user = UserModel::googleAuth($body);
+            $curriculo = CurriculoModel::getByUser($user['id'] ?? null, $user['email'] ?? null);
+            jsonResponse([
+                'success' => true,
+                'user' => $user,
+                'curriculo' => $curriculo
+            ]);
+        } catch (InvalidArgumentException $e) {
+            jsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    if (preg_match('#^/api/auth/me/?$#', $uri) && $method === 'GET') {
+        $token = getBearerToken();
+        $user = UserModel::findByToken($token);
+        if (!$user) {
+            jsonResponse(['success' => false, 'error' => 'Sessão inválida ou expirada.'], 401);
+        }
+        $curriculo = CurriculoModel::getByUser($user['id'] ?? null, $user['email'] ?? null);
+        jsonResponse([
+            'success' => true,
+            'user' => $user,
+            'curriculo' => $curriculo
+        ]);
+    }
+
+    if (preg_match('#^/api/auth/logout/?$#', $uri) && $method === 'POST') {
+        $token = getBearerToken();
+        UserModel::logout($token);
+        jsonResponse(['success' => true, 'message' => 'Sessão encerrada com sucesso.']);
     }
 
     // 2. ETAPAS
@@ -77,10 +153,27 @@ try {
 
     // 4. CURRICULOS
     if (preg_match('#^/api/curriculos/?$#', $uri)) {
+        $token = getBearerToken();
+        $authUser = $token ? UserModel::findByToken($token) : null;
+
         if ($method === 'GET') {
+            $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : ($authUser['id'] ?? null);
+            $email = $_GET['email'] ?? ($authUser['email'] ?? null);
+            if ($userId || $email) {
+                $curriculo = CurriculoModel::getByUser($userId, $email);
+                jsonResponse(['success' => true, 'data' => $curriculo]);
+            }
             $curriculos = CurriculoModel::getAll();
             jsonResponse(['success' => true, 'data' => $curriculos]);
         } elseif ($method === 'POST') {
+            if ($authUser) {
+                if (empty($body['user_id'])) {
+                    $body['user_id'] = $authUser['id'];
+                }
+                if (empty($body['email'])) {
+                    $body['email'] = $authUser['email'];
+                }
+            }
             $saved = CurriculoModel::save($body);
             jsonResponse(['success' => true, 'data' => $saved]);
         }

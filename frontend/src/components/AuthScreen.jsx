@@ -9,34 +9,37 @@ import {
   Sun, 
   Moon, 
   Globe, 
-  Sparkles,
   Shield,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
 import { GoogleIcon } from './GoogleAuthModal';
+import { apiService } from '../services/api';
 
 export default function AuthScreen({ 
   onLoginSuccess, 
   theme, 
   toggleTheme 
 }) {
-  const { t, language, setLanguage, languages } = useI18n();
+  const { language, setLanguage, languages } = useI18n();
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   
-  // Estados do formulário de e-mail
+  // Estados do formulário de e-mail e senha
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmSenha, setConfirmSenha] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Estados para seleção/personalização de conta Google
+  // Estados para login / cadastro com conta Google integrada ao backend
   const [showGoogleAccounts, setShowGoogleAccounts] = useState(false);
   const [googleCustomName, setGoogleCustomName] = useState('');
   const [googleCustomEmail, setGoogleCustomEmail] = useState('');
+  const [googleCustomPassword, setGoogleCustomPassword] = useState('');
 
-  // Limpeza preventiva de contas de exemplo salvas anteriormente
+  // Limpeza preventiva de contas de exemplo antigas
   useEffect(() => {
     try {
       const storedGoogle = localStorage.getItem('curriculo_google_user');
@@ -50,28 +53,43 @@ export default function AuthScreen({
     } catch (e) {}
   }, []);
 
-  const handleGoogleLogin = (account) => {
-    localStorage.setItem('curriculo_auth_user', JSON.stringify(account));
-    localStorage.setItem('curriculo_google_user', JSON.stringify(account));
-    onLoginSuccess(account);
+  const persistAndContinue = (user, curriculo = null) => {
+    localStorage.setItem('curriculo_auth_user', JSON.stringify(user));
+    if (user.provider === 'google') {
+      localStorage.setItem('curriculo_google_user', JSON.stringify(user));
+    }
+    onLoginSuccess(user, curriculo);
   };
 
-  const handleCustomGoogleSubmit = (e) => {
+  const handleCustomGoogleSubmit = async (e) => {
     e.preventDefault();
-    if (!googleCustomName || !googleCustomEmail) {
-      setErrorMsg('Preencha seu nome e e-mail Google.');
+    setErrorMsg('');
+
+    if (!googleCustomEmail || !googleCustomPassword) {
+      setErrorMsg('Informe o e-mail da sua conta Google e a senha de acesso.');
       return;
     }
-    const account = {
-      name: googleCustomName,
-      email: googleCustomEmail,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(googleCustomName)}&background=0f3a68&color=fff`,
-      provider: 'google'
-    };
-    handleGoogleLogin(account);
+    if (googleCustomPassword.length < 4) {
+      setErrorMsg('A senha deve ter pelo menos 4 caracteres.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await apiService.googleAuth({
+        name: googleCustomName,
+        email: googleCustomEmail,
+        password: googleCustomPassword
+      });
+      persistAndContinue(res.user, res.curriculo);
+    } catch (err) {
+      setErrorMsg(err.message || 'Erro ao autenticar com a conta Google no servidor.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailAuthSubmit = (e) => {
+  const handleEmailAuthSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -87,43 +105,51 @@ export default function AuthScreen({
       }
       if (senha.length < 4) {
         setErrorMsg('A senha deve ter pelo menos 4 caracteres.');
-        return;
       }
       if (confirmSenha && senha !== confirmSenha) {
         setErrorMsg('As senhas digitadas não coincidem.');
         return;
       }
 
-      const newUser = {
-        name: nome,
-        email: email,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=0f3a68&color=fff`,
-        provider: 'email'
-      };
-      localStorage.setItem('curriculo_auth_user', JSON.stringify(newUser));
-      onLoginSuccess(newUser);
+      setIsLoading(true);
+      try {
+        const res = await apiService.register({
+          name: nome,
+          email: email,
+          password: senha
+        });
+        persistAndContinue(res.user, res.curriculo);
+      } catch (err) {
+        setErrorMsg(err.message || 'Não foi possível criar a conta.');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
-      // Modo Login por E-mail
-      const loggedUser = {
-        name: email.split('@')[0].replace('.', ' '),
-        email: email,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(email)}&background=0f3a68&color=fff`,
-        provider: 'email'
-      };
-      localStorage.setItem('curriculo_auth_user', JSON.stringify(loggedUser));
-      onLoginSuccess(loggedUser);
+      // Modo Login por E-mail e Senha no Backend
+      setIsLoading(true);
+      try {
+        const res = await apiService.login({
+          email: email,
+          password: senha
+        });
+        persistAndContinue(res.user, res.curriculo);
+      } catch (err) {
+        setErrorMsg(err.message || 'E-mail ou senha incorretos.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleGuestLogin = () => {
     const guestUser = {
-      name: 'Pesquisador Convidado',
+      name: 'Profissional Convidado',
       email: 'convidado@curiculo.online',
-      avatar: 'https://ui-avatars.com/api/?name=Convidado&background=334155&color=fff',
+      avatar: 'https://ui-avatars.com/api/?name=Profissional&background=334155&color=fff',
       provider: 'guest'
     };
     localStorage.setItem('curriculo_auth_user', JSON.stringify(guestUser));
-    onLoginSuccess(guestUser);
+    onLoginSuccess(guestUser, null);
   };
 
   return (
@@ -181,7 +207,7 @@ export default function AuthScreen({
               {authMode === 'login' ? 'Bem-vindo de volta' : 'Crie sua Conta'}
             </h1>
             <p className="auth-subtitle">
-              Modelos de Currículo Lattes & Acadêmicos CNPq em padrão A4 de alta qualidade.
+              Modelos de Currículo Lattes & Acadêmicos CNPq sincronizados com o servidor.
             </p>
           </div>
 
@@ -192,47 +218,71 @@ export default function AuthScreen({
             </div>
           )}
 
-          {/* 1. BOTÃO DE LOGIN COM GOOGLE */}
+          {/* 1. BOTÃO DE LOGIN E SENHA COM CONTA GOOGLE */}
           <div className="auth-google-section">
             <button
               type="button"
               className="btn-google-auth"
-              onClick={() => setShowGoogleAccounts(prev => !prev)}
+              onClick={() => {
+                setShowGoogleAccounts(prev => !prev);
+                setErrorMsg('');
+              }}
             >
               <GoogleIcon size={20} />
-              <span>Continuar com o Google</span>
+              <span>Entrar ou Criar Senha com Google</span>
             </button>
 
-            {/* Gaveta de Login com Google */}
+            {/* Gaveta de Login e Senha com Conta Google (Integrada ao Backend) */}
             {showGoogleAccounts && (
               <div className="google-accounts-picker">
                 <form onSubmit={handleCustomGoogleSubmit}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                    Informe sua conta Google:
+                    Acesse ou crie seu login e senha com sua conta Google:
                   </div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Seu Nome Completo"
-                    value={googleCustomName}
-                    onChange={e => setGoogleCustomName(e.target.value)}
-                    style={{ marginBottom: 8, fontSize: '0.85rem', padding: '8px 10px' }}
-                    autoFocus
-                  />
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="seu.email@gmail.com"
-                    value={googleCustomEmail}
-                    onChange={e => setGoogleCustomEmail(e.target.value)}
-                    style={{ marginBottom: 10, fontSize: '0.85rem', padding: '8px 10px' }}
-                  />
+                  <div className="input-with-icon" style={{ marginBottom: 8 }}>
+                    <User size={15} className="input-icon" />
+                    <input
+                      type="text"
+                      className="form-control with-icon"
+                      placeholder="Seu Nome Completo (para novos cadastros)"
+                      value={googleCustomName}
+                      onChange={e => setGoogleCustomName(e.target.value)}
+                      style={{ fontSize: '0.84rem', padding: '8px 10px 8px 34px' }}
+                    />
+                  </div>
+                  <div className="input-with-icon" style={{ marginBottom: 8 }}>
+                    <Mail size={15} className="input-icon" />
+                    <input
+                      type="email"
+                      className="form-control with-icon"
+                      placeholder="seu.email@gmail.com"
+                      value={googleCustomEmail}
+                      onChange={e => setGoogleCustomEmail(e.target.value)}
+                      style={{ fontSize: '0.84rem', padding: '8px 10px 8px 34px' }}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="input-with-icon" style={{ marginBottom: 10 }}>
+                    <Lock size={15} className="input-icon" />
+                    <input
+                      type="password"
+                      className="form-control with-icon"
+                      placeholder="Crie ou digite sua senha (mín. 4 caracteres)"
+                      value={googleCustomPassword}
+                      onChange={e => setGoogleCustomPassword(e.target.value)}
+                      style={{ fontSize: '0.84rem', padding: '8px 10px 8px 34px' }}
+                      required
+                    />
+                  </div>
                   <button 
                     type="submit" 
-                    className="btn btn-secondary" 
-                    style={{ width: '100%', fontSize: '0.84rem', padding: '8px 12px', justifyContent: 'center' }}
+                    className="btn btn-primary" 
+                    disabled={isLoading}
+                    style={{ width: '100%', fontSize: '0.84rem', padding: '9px 12px', justifyContent: 'center' }}
                   >
-                    <UserCheck size={16} /> Entrar com esta conta Google
+                    {isLoading ? <Loader2 size={16} /> : <UserCheck size={16} />}
+                    <span>{isLoading ? 'Autenticando...' : 'Autenticar Conta Google'}</span>
                   </button>
                 </form>
               </div>
@@ -241,7 +291,7 @@ export default function AuthScreen({
 
           {/* Divisor Visual */}
           <div className="auth-divider">
-            <span>ou continue com e-mail</span>
+            <span>ou use login e senha direto</span>
           </div>
 
           {/* Abas Alternadoras: Entrar vs Cadastrar */}
@@ -262,7 +312,7 @@ export default function AuthScreen({
             </button>
           </div>
 
-          {/* Formulário de E-mail */}
+          {/* Formulário de E-mail e Senha Integrado ao Backend */}
           <form onSubmit={handleEmailAuthSubmit} className="auth-form">
             {authMode === 'register' && (
               <div className="form-group">
@@ -282,13 +332,13 @@ export default function AuthScreen({
             )}
 
             <div className="form-group">
-              <label className="form-label required">E-mail</label>
+              <label className="form-label required">E-mail (Login)</label>
               <div className="input-with-icon">
                 <Mail size={16} className="input-icon" />
                 <input
                   type="email"
                   className="form-control with-icon"
-                  placeholder="seu.email@instituicao.br"
+                  placeholder="seu.email@gmail.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
@@ -303,7 +353,7 @@ export default function AuthScreen({
                 <input
                   type="password"
                   className="form-control with-icon"
-                  placeholder="Sua senha secreta"
+                  placeholder="Sua senha secreta (mín. 4 caracteres)"
                   value={senha}
                   onChange={e => setSenha(e.target.value)}
                   required
@@ -328,8 +378,12 @@ export default function AuthScreen({
               </div>
             )}
 
-            <button type="submit" className="btn btn-primary auth-submit-btn">
-              <span>{authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta e Começar'}</span>
+            <button type="submit" className="btn btn-primary auth-submit-btn" disabled={isLoading}>
+              <span>
+                {isLoading 
+                  ? 'Processando no servidor...' 
+                  : (authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta e Começar')}
+              </span>
               <ArrowRight size={16} />
             </button>
           </form>
@@ -351,7 +405,7 @@ export default function AuthScreen({
         <div className="auth-features-bar">
           <div className="auth-feature-item">
             <Shield size={16} className="text-accent" />
-            <span>Dados preservados localmente com segurança</span>
+            <span>Autenticação criptografada integrada ao Backend PHP</span>
           </div>
           <div className="auth-feature-item">
             <CheckCircle size={16} className="text-success" />

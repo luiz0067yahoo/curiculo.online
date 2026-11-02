@@ -16,6 +16,7 @@ import {
   Square,
   RectangleVertical
 } from 'lucide-react';
+import { useDialog } from './DialogModal';
 
 export default function ProfilePhotoEditor({
   photoData = {},
@@ -23,6 +24,7 @@ export default function ProfilePhotoEditor({
   themeColor = '#0f3a68'
 }) {
   const fileInputRef = useRef(null);
+  const { showAlert } = useDialog();
 
   const photoUrl = photoData.foto_url || '';
   const zoom = photoData.foto_zoom ?? 1;
@@ -37,7 +39,11 @@ export default function ProfilePhotoEditor({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP).');
+      showAlert({
+        title: 'Formato de Imagem Inválido',
+        message: 'Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP).',
+        variant: 'warning'
+      });
       return;
     }
 
@@ -87,15 +93,24 @@ export default function ProfilePhotoEditor({
   // Dimensões do enquadramento no visualizador: Círculo (1:1), Quadrado (1:1), 3x4 (proporção clássica)
   let frameWidth = 120;
   let frameHeight = 120;
+  let outerRadius = '50%';
   let frameRadius = '50%';
 
   if (formato === 'quadrado') {
-    frameRadius = '14px';
+    outerRadius = '10px';
+    frameRadius = '6px';
   } else if (formato === 'retangular') {
-    frameWidth = 100;
-    frameHeight = 133;
-    frameRadius = '10px';
+    frameWidth = 96;
+    frameHeight = 128;
+    outerRadius = '8px';
+    frameRadius = '4px';
   }
+
+  const shapeOptions = [
+    { value: 'circulo', label: 'Círculo', Icon: Circle, title: 'Mudar para formato Círculo' },
+    { value: 'quadrado', label: 'Quadrado', Icon: Square, title: 'Mudar para formato Quadrado' },
+    { value: 'retangular', label: '3x4', Icon: RectangleVertical, title: 'Mudar para formato 3x4 Clássico' }
+  ];
 
   return (
     <div className="profile-photo-editor-card">
@@ -126,7 +141,7 @@ export default function ProfilePhotoEditor({
             style={{
               width: temAro ? frameWidth + 10 : frameWidth,
               height: temAro ? frameHeight + 10 : frameHeight,
-              borderRadius: frameRadius,
+              borderRadius: outerRadius,
               border: temAro ? `3px solid ${themeColor}` : 'none',
               padding: temAro ? '3px' : '0px',
               backgroundColor: '#ffffff',
@@ -151,11 +166,12 @@ export default function ProfilePhotoEditor({
                 backgroundColor: '#f1f5f9',
                 margin: 0,
                 position: 'relative',
+                isolation: 'isolate',
                 transition: 'border-radius 0.25s ease'
               }}
             >
               {photoUrl ? (
-                /* Imagem do perfil renderizada como background */
+                /* Imagem do perfil renderizada como background (sem border-radius próprio para não mover o círculo) */
                 <div
                   className="photo-bg-preview"
                   style={{
@@ -165,10 +181,10 @@ export default function ProfilePhotoEditor({
                     backgroundPosition: 'center center',
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
-                    borderRadius: frameRadius,
-                    transform: `scale(${zoom}) translate(${x}%, ${y}%)`,
+                    borderRadius: 0,
+                    transform: `translate(${x}%, ${y}%) scale(${zoom})`,
                     transformOrigin: 'center center',
-                    transition: 'transform 0.1s ease-out, border-radius 0.25s ease'
+                    transition: 'transform 0.1s ease-out'
                   }}
                   title="Foto de perfil (imagem em background)"
                 />
@@ -187,71 +203,60 @@ export default function ProfilePhotoEditor({
             </span>
           </div>
 
-          {/* Seleção de Formato no Lado Esquerdo (Círculo, Quadrado, 3x4) */}
+          {/* Seleção de Formato no Lado Esquerdo (Círculo, Quadrado, 3x4) com Input Radio na Borda */}
           <div style={{ marginTop: 10, width: '100%' }}>
-            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5, textAlign: 'center' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textAlign: 'center' }}>
               Formato no Lado Esquerdo:
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
-              <button
-                type="button"
-                className={`btn btn-secondary ${formato === 'circulo' ? 'active-shape' : ''}`}
-                style={{
-                  padding: '6px 2px',
-                  fontSize: '0.72rem',
-                  gap: 3,
-                  flexDirection: 'column',
-                  border: formato === 'circulo' ? `2px solid ${themeColor}` : '1px solid var(--border-color)',
-                  background: formato === 'circulo' ? 'var(--bg-tertiary)' : 'transparent',
-                  fontWeight: formato === 'circulo' ? 700 : 500,
-                  borderRadius: 'var(--radius-sm)'
-                }}
-                onClick={() => updateField('foto_formato', 'circulo')}
-                title="Mudar para formato Círculo"
-              >
-                <Circle size={14} style={{ color: themeColor }} />
-                <span>Círculo</span>
-              </button>
-
-              <button
-                type="button"
-                className={`btn btn-secondary ${formato === 'quadrado' ? 'active-shape' : ''}`}
-                style={{
-                  padding: '6px 2px',
-                  fontSize: '0.72rem',
-                  gap: 3,
-                  flexDirection: 'column',
-                  border: formato === 'quadrado' ? `2px solid ${themeColor}` : '1px solid var(--border-color)',
-                  background: formato === 'quadrado' ? 'var(--bg-tertiary)' : 'transparent',
-                  fontWeight: formato === 'quadrado' ? 700 : 500,
-                  borderRadius: 'var(--radius-sm)'
-                }}
-                onClick={() => updateField('foto_formato', 'quadrado')}
-                title="Mudar para formato Quadrado"
-              >
-                <Square size={14} style={{ color: themeColor }} />
-                <span>Quadrado</span>
-              </button>
-
-              <button
-                type="button"
-                className={`btn btn-secondary ${formato === 'retangular' ? 'active-shape' : ''}`}
-                style={{
-                  padding: '6px 2px',
-                  fontSize: '0.72rem',
-                  gap: 3,
-                  flexDirection: 'column',
-                  border: formato === 'retangular' ? `2px solid ${themeColor}` : '1px solid var(--border-color)',
-                  background: formato === 'retangular' ? 'var(--bg-tertiary)' : 'transparent',
-                  fontWeight: formato === 'retangular' ? 700 : 500,
-                  borderRadius: 'var(--radius-sm)'
-                }}
-                onClick={() => updateField('foto_formato', 'retangular')}
-                title="Mudar para formato 3x4 Clássico"
-              >
-                <RectangleVertical size={14} style={{ color: themeColor }} />
-                <span>3x4</span>
-              </button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {shapeOptions.map(({ value, label, Icon, title }) => {
+                const isSelected = formato === value;
+                return (
+                  <label
+                    key={value}
+                    className={`btn btn-secondary ${isSelected ? 'active-shape' : ''}`}
+                    style={{
+                      position: 'relative',
+                      padding: '10px 4px 8px',
+                      fontSize: '0.72rem',
+                      gap: 4,
+                      flexDirection: 'column',
+                      border: isSelected ? `2px solid ${themeColor}` : '1px solid var(--border-color)',
+                      background: isSelected ? `${themeColor}10` : 'var(--bg-secondary)',
+                      fontWeight: isSelected ? 700 : 500,
+                      color: isSelected ? themeColor : 'var(--text-primary)',
+                      borderRadius: 'var(--radius-sm)',
+                      boxShadow: isSelected ? `0 0 0 2px ${themeColor}22` : 'none',
+                      cursor: 'pointer',
+                      margin: 0,
+                      userSelect: 'none'
+                    }}
+                    title={title}
+                  >
+                    <input
+                      type="radio"
+                      name="foto_formato_radio"
+                      value={value}
+                      checked={isSelected}
+                      onChange={() => updateField('foto_formato', value)}
+                      style={{
+                        position: 'absolute',
+                        top: -7,
+                        right: -5,
+                        width: 15,
+                        height: 15,
+                        margin: 0,
+                        accentColor: themeColor,
+                        cursor: 'pointer',
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderRadius: '50%'
+                      }}
+                    />
+                    <Icon size={15} style={{ color: isSelected ? themeColor : 'var(--text-secondary)' }} />
+                    <span>{label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 

@@ -20,7 +20,7 @@ export default function LattesResumido({ data, themeColor = '#0f766e' }) {
       <div className="header-box" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <ProfilePhotoView data={data} themeColor="#ffffff" size={68} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ fontSize: '15pt', margin: 0, fontWeight: 800 }}>{b.nome || 'Pesquisador'}</h2>
+          <h2 style={{ fontSize: '15pt', margin: 0, fontWeight: 800 }}>{b.nome || 'Profissional'}</h2>
           <div style={{ fontSize: '8.5pt', opacity: 0.9 }}>
             {formacoes[0]?.curso} | {t('lattesTemplate.idLattesLabel')} {lat.id_lattes || '----'} | {t('lattesTemplate.orcidLabel')} {lat.orcid || '----'}
           </div>

@@ -13,6 +13,7 @@ import {
 import { RESUME_MODELS } from '../data/modelsData';
 import { useI18n } from '../i18n/I18nContext';
 import ProfilePhotoEditor from './ProfilePhotoEditor';
+import { useDialog } from './DialogModal';
 
 import LattesTradicional from './templates/LattesTradicional';
 import LattesModerno from './templates/LattesModerno';
@@ -69,6 +70,7 @@ export default function ResumePreview({
   onImportJson 
 }) {
   const { t } = useI18n();
+  const { showAlert } = useDialog();
   const [zoom, setZoom] = useState(100);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
@@ -95,7 +97,7 @@ export default function ResumePreview({
           const parsed = JSON.parse(event.target.result);
           onImportJson(parsed);
         } catch (err) {
-          alert('Arquivo JSON inválido.');
+          showAlert({ title: 'Arquivo JSON Inválido', message: 'O arquivo selecionado não é um JSON de currículo válido.', variant: 'danger' });
         }
       };
       reader.readAsText(file);
@@ -290,7 +292,8 @@ export default function ResumePreview({
                 foto_x: formData.dados_basicos?.foto_x ?? formData.dados_pessoais?.foto_x ?? 0,
                 foto_y: formData.dados_basicos?.foto_y ?? formData.dados_pessoais?.foto_y ?? 0,
                 foto_exibir: formData.dados_basicos?.foto_exibir ?? formData.dados_pessoais?.foto_exibir ?? true,
-                foto_formato: formData.dados_basicos?.foto_formato || formData.dados_pessoais?.foto_formato || 'circulo'
+                foto_formato: formData.dados_basicos?.foto_formato || formData.dados_pessoais?.foto_formato || 'circulo',
+                foto_aro: formData.dados_basicos?.foto_aro ?? formData.dados_pessoais?.foto_aro ?? true
               }}
               onChange={(newPhoto) => {
                 setFormData(prev => ({

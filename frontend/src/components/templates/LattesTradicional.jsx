@@ -36,7 +36,7 @@ export default function LattesTradicional({ data, themeColor = '#0f3a68' }) {
       <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', marginBottom: 14 }}>
         <ProfilePhotoView data={data} themeColor={themeColor} size={92} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="lattes-name-title" style={{ marginTop: 0 }}>{b.nome || 'Nome Completo do Pesquisador'}</div>
+          <div className="lattes-name-title" style={{ marginTop: 0 }}>{b.nome || 'Nome Completo do Profissional'}</div>
           
           <div className="lattes-meta-grid">
             <div><strong>{t('lattesTemplate.citationLabel')}</strong> {lat.citacoes_bibliograficas || b.nome}</div>

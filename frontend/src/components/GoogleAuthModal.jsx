@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, LogIn, Check, ShieldCheck, User } from 'lucide-react';
+import { X, LogIn, ShieldCheck } from 'lucide-react';
+import { apiService } from '../services/api';
 
 export function GoogleIcon({ size = 18 }) {
   return (
@@ -31,26 +32,36 @@ export default function GoogleAuthModal({
 }) {
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
+  const [customPassword, setCustomPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSelectAccount = (account) => {
-    localStorage.setItem('curriculo_google_user', JSON.stringify(account));
-    onLoginSuccess(account);
-    onClose();
-  };
-
-  const handleCustomSubmit = (e) => {
+  const handleCustomSubmit = async (e) => {
     e.preventDefault();
-    if (!customName || !customEmail) return;
+    setErrorMsg('');
+    if (!customEmail || !customPassword) {
+      setErrorMsg('Informe o e-mail Google e a senha.');
+      return;
+    }
 
-    const account = {
-      name: customName,
-      email: customEmail,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(customName)}&background=0f3a68&color=fff`,
-      provider: 'google'
-    };
-    handleSelectAccount(account);
+    setIsLoading(true);
+    try {
+      const res = await apiService.googleAuth({
+        name: customName,
+        email: customEmail,
+        password: customPassword
+      });
+      localStorage.setItem('curriculo_google_user', JSON.stringify(res.user));
+      localStorage.setItem('curriculo_auth_user', JSON.stringify(res.user));
+      onLoginSuccess(res.user, res.curriculo);
+      onClose();
+    } catch (err) {
+      setErrorMsg(err.message || 'Erro ao autenticar com o Google.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,6 +96,12 @@ export default function GoogleAuthModal({
           </button>
         </div>
 
+        {errorMsg && (
+          <div className="auth-error-banner" role="alert" style={{ marginBottom: 12 }}>
+            {errorMsg}
+          </div>
+        )}
+
         {/* Informações de Privacidade e Segurança */}
         <div style={{ 
           background: 'var(--bg-tertiary)', 
@@ -98,21 +115,19 @@ export default function GoogleAuthModal({
           color: 'var(--text-secondary)'
         }}>
           <ShieldCheck size={18} style={{ color: '#10b981', flexShrink: 0 }} />
-          <span>Acesso seguro verificado. Seus dados do currículo ficam salvos no seu perfil.</span>
+          <span>Acesso seguro sincronizado com o servidor.</span>
         </div>
 
-        {/* Formulário de Conta Customizada */}
+        {/* Formulário de Conta Google com Senha */}
         <form onSubmit={handleCustomSubmit}>
           <div className="form-group">
-            <label className="form-label required">Nome Completo</label>
+            <label className="form-label">Nome Completo</label>
             <input
               type="text"
               className="form-control"
               placeholder="Seu Nome Completo"
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
-              required
-              autoFocus
             />
           </div>
 
@@ -124,6 +139,19 @@ export default function GoogleAuthModal({
               placeholder="seuemail@gmail.com"
               value={customEmail}
               onChange={(e) => setCustomEmail(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Senha de Acesso</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Crie ou digite sua senha (mín. 4 caracteres)"
+              value={customPassword}
+              onChange={(e) => setCustomPassword(e.target.value)}
               required
             />
           </div>
@@ -140,9 +168,10 @@ export default function GoogleAuthModal({
             <button
               type="submit"
               className="btn btn-primary"
+              disabled={isLoading}
               style={{ flex: 1 }}
             >
-              <LogIn size={15} /> Entrar com Google
+              <LogIn size={15} /> {isLoading ? 'Autenticando...' : 'Entrar com Google'}
             </button>
           </div>
         </form>

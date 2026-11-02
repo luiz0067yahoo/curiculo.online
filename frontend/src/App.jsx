@@ -8,25 +8,27 @@ import AuthScreen from './components/AuthScreen';
 
 import { apiService } from './services/api';
 import { DEFAULT_STEPS } from './data/defaultSteps';
-import { EMPTY_RESUME_DATA, SAMPLE_RESUME_DATA } from './data/sampleResumeData';
+import { EMPTY_RESUME_DATA } from './data/sampleResumeData';
 import { useI18n } from './i18n/I18nContext';
+import { useDialog } from './components/DialogModal';
 
 export default function App() {
   const { t } = useI18n();
+  const { showConfirm } = useDialog();
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const stored = localStorage.getItem('curriculo_auth_user');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (
-          parsed?.avatar?.includes('images.unsplash.com') || 
-          parsed?.email === 'mock@example.com'
-
-
-        ) {
+        if (parsed?.avatar?.includes('images.unsplash.com')) {
           localStorage.removeItem('curriculo_auth_user');
           localStorage.removeItem('curriculo_google_user');
           return null;
+        }
+        if (parsed?.name === 'Pesquisador Convidado') {
+          parsed.name = 'Profissional Convidado';
+          parsed.avatar = 'https://ui-avatars.com/api/?name=Profissional&background=334155&color=fff';
+          localStorage.setItem('curriculo_auth_user', JSON.stringify(parsed));
         }
         return parsed;
       }
@@ -39,6 +41,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('curriculo_theme') || 'light');
   const [etapas, setEtapas] = useState(DEFAULT_STEPS);
   const [formData, setFormData] = useState(EMPTY_RESUME_DATA);
+  const [curriculoUuid, setCurriculoUuid] = useState(null);
   const [selectedModelSlug, setSelectedModelSlug] = useState('modelo-vitae');
   const [themeColor, setThemeColor] = useState('#0f3a68');
   const [isSaving, setIsSaving] = useState(false);
@@ -46,7 +49,6 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
   const [storageMode, setStorageMode] = useState('local');
 
-  // Inicialização e carregamento do backend PHP
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('curriculo_theme', theme);
@@ -54,22 +56,51 @@ export default function App() {
 
   useEffect(() => {
     async function loadInitialData() {
-      // Carregar etapas
+      // Carregar etapas do backend
       const loadedEtapas = await apiService.getEtapas();
       if (loadedEtapas && loadedEtapas.length > 0) {
         setEtapas(loadedEtapas);
       }
 
-      // Carregar currículo salvo previamente se existir
-      const savedCurriculo = await apiService.getCurriculoSalvo();
-      if (savedCurriculo && savedCurriculo.dados) {
-        const isOldSample = savedCurriculo.dados?.identificadores_lattes?.id_lattes === '8492019384756102';
-        if (!isOldSample) {
+      // Sincronizar usuário autenticado e currículo salvo no backend
+      let activeUser = currentUser;
+      if (activeUser?.token) {
+        const meRes = await apiService.getMe();
+        if (meRes?.user) {
+          activeUser = meRes.user;
+          setCurrentUser(meRes.user);
+          localStorage.setItem('curriculo_auth_user', JSON.stringify(meRes.user));
+          if (meRes.curriculo?.dados) {
+            setFormData(meRes.curriculo.dados);
+            if (meRes.curriculo.uuid) setCurriculoUuid(meRes.curriculo.uuid);
+            if (meRes.curriculo.modelo_slug) setSelectedModelSlug(meRes.curriculo.modelo_slug);
+            if (meRes.curriculo.cor_tema) setThemeColor(meRes.curriculo.cor_tema);
+          }
+        }
+      } else if (activeUser) {
+        const savedCurriculo = await apiService.getCurriculoSalvo(activeUser);
+        if (savedCurriculo && savedCurriculo.dados) {
+          if (savedCurriculo.dados?.dados_basicos?.nome === 'Pesquisador Convidado') {
+            savedCurriculo.dados.dados_basicos.nome = 'Profissional Convidado';
+          }
+          if (savedCurriculo.dados?.identificadores_lattes?.citacoes_bibliograficas === 'Pesquisador Convidado') {
+            savedCurriculo.dados.identificadores_lattes.citacoes_bibliograficas = 'Profissional Convidado';
+          }
           setFormData(savedCurriculo.dados);
+          if (savedCurriculo.uuid) setCurriculoUuid(savedCurriculo.uuid);
           if (savedCurriculo.modelo_slug) setSelectedModelSlug(savedCurriculo.modelo_slug);
           if (savedCurriculo.cor_tema) setThemeColor(savedCurriculo.cor_tema);
         } else {
-          localStorage.removeItem('curriculo_saved_data');
+          setFormData(prev => ({
+            ...prev,
+            dados_basicos: {
+              ...(prev.dados_basicos || {}),
+              nome: activeUser.name || prev.dados_basicos?.nome || '',
+              email: activeUser.email || prev.dados_basicos?.email || '',
+              foto_url: activeUser.avatar || prev.dados_basicos?.foto_url || '',
+              foto_exibir: true
+            }
+          }));
         }
       }
 
@@ -96,8 +127,15 @@ export default function App() {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const handleClearForm = () => {
-    if (window.confirm('Tem certeza de que deseja limpar todos os campos do currículo?')) {
+  const handleClearForm = async () => {
+    const confirmed = await showConfirm({
+      title: 'Limpar Todos os Campos',
+      message: 'Tem certeza de que deseja limpar todos os campos do currículo? Esta ação removerá os dados preenchidos.',
+      confirmText: 'Sim, Limpar Campos',
+      cancelText: 'Cancelar',
+      variant: 'danger'
+    });
+    if (confirmed) {
       setFormData(EMPTY_RESUME_DATA);
       localStorage.removeItem('curriculo_saved_data');
       showToast('Todos os campos foram limpos com sucesso!');
@@ -113,14 +151,19 @@ export default function App() {
     setIsSaving(true);
     try {
       const payload = {
-        titulo: `Currículo Lattes - ${formData.dados_basicos?.nome || 'Pesquisador'}`,
-        nome_completo: formData.dados_basicos?.nome || '',
-        email: formData.dados_basicos?.email || '',
+        uuid: curriculoUuid,
+        user_id: currentUser?.id || null,
+        titulo: `Currículo Lattes - ${formData.dados_basicos?.nome || currentUser?.name || 'Profissional'}`,
+        nome_completo: formData.dados_basicos?.nome || currentUser?.name || '',
+        email: formData.dados_basicos?.email || currentUser?.email || '',
         modelo_slug: selectedModelSlug,
         cor_tema: themeColor,
         dados: formData
       };
-      await apiService.saveCurriculo(payload);
+      const saved = await apiService.saveCurriculo(payload);
+      if (saved?.uuid) {
+        setCurriculoUuid(saved.uuid);
+      }
       showToast(t('toasts.savedSuccess'));
     } catch (e) {
       showToast(t('toasts.savedLocal'));
@@ -174,32 +217,65 @@ export default function App() {
     }
   };
 
-  const handleAuthSuccess = (user) => {
+  const handleAuthSuccess = async (user, backendCurriculo = null) => {
     setCurrentUser(user);
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        dados_basicos: {
-          ...(prev.dados_basicos || {}),
-          nome: user.name || prev.dados_basicos?.nome,
-          email: user.email || prev.dados_basicos?.email,
-          foto_url: user.avatar || prev.dados_basicos?.foto_url,
-          foto_exibir: true
-        },
-        dados_pessoais: {
-          ...(prev.dados_pessoais || {}),
-          foto_url: user.avatar || prev.dados_pessoais?.foto_url,
-          foto_exibir: true
-        }
-      }));
-      showToast(`Bem-vindo, ${user.name}!`);
+    if (!user) return;
+
+    if (backendCurriculo && backendCurriculo.dados) {
+      setFormData(backendCurriculo.dados);
+      if (backendCurriculo.uuid) setCurriculoUuid(backendCurriculo.uuid);
+      if (backendCurriculo.modelo_slug) setSelectedModelSlug(backendCurriculo.modelo_slug);
+      if (backendCurriculo.cor_tema) setThemeColor(backendCurriculo.cor_tema);
+      showToast(`Bem-vindo de volta, ${user.name}! Currículo carregado.`);
+      return;
     }
+
+    const initialData = {
+      ...EMPTY_RESUME_DATA,
+      dados_basicos: {
+        ...EMPTY_RESUME_DATA.dados_basicos,
+        nome: user.name || '',
+        email: user.email || '',
+        foto_url: user.avatar || '',
+        foto_exibir: true
+      },
+      dados_pessoais: {
+        ...EMPTY_RESUME_DATA.dados_pessoais,
+        foto_url: user.avatar || '',
+        foto_exibir: true
+      }
+    };
+    setFormData(initialData);
+    setCurriculoUuid(null);
+
+    if (user.provider !== 'guest') {
+      try {
+        const saved = await apiService.saveCurriculo({
+          user_id: user.id || null,
+          titulo: `Currículo Lattes - ${user.name}`,
+          nome_completo: user.name || '',
+          email: user.email || '',
+          modelo_slug: selectedModelSlug,
+          cor_tema: themeColor,
+          dados: initialData
+        });
+        if (saved?.uuid) {
+          setCurriculoUuid(saved.uuid);
+        }
+      } catch (e) {}
+    }
+
+    showToast(`Bem-vindo, ${user.name}!`);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await apiService.logout();
     localStorage.removeItem('curriculo_auth_user');
     localStorage.removeItem('curriculo_google_user');
+    localStorage.removeItem('curriculo_saved_data');
     setCurrentUser(null);
+    setCurriculoUuid(null);
+    setFormData(EMPTY_RESUME_DATA);
     showToast('Sessão encerrada com sucesso.');
   };
 
@@ -223,7 +299,6 @@ export default function App() {
     showToast(`Perfil atualizado: ${googleUser.name}`);
   };
 
-  // Se o usuário ainda não estiver autenticado, a PRIMEIRA TELA é o login do Google / Cadastro
   if (!currentUser) {
     return (
       <AuthScreen
@@ -236,7 +311,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Toast Notification */}
       {toastMessage && (
         <div 
           style={{
@@ -261,7 +335,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Barra de Navegação Superior */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -277,7 +350,6 @@ export default function App() {
         onApplyGoogleProfile={handleApplyGoogleProfile}
       />
 
-      {/* Conteúdo Principal */}
       <main className="main-content">
         {activeTab === 'wizard' && (
           <div className="split-view-grid">
@@ -306,7 +378,6 @@ export default function App() {
           </div>
         )}
 
-        {/* 4. Última Aba: Currículo Atual Completo */}
         {activeTab === 'curriculo' && (
           <div className="curriculo-tab-view" style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
             <ResumePreview

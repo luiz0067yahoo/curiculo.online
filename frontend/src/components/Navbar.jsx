@@ -127,7 +127,11 @@ export default function Navbar({
               </button>
 
               {isUserMenuOpen && (
-                <div className="google-user-dropdown" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="google-user-dropdown"
+                  style={{ left: 0, right: 'auto' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border-color)' }}>
                     <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{activeUser.name}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{activeUser.email}</div>

@@ -26,14 +26,17 @@ export default function ProfilePhotoView({
   // Dimensões dinâmicas: Círculo (1:1), Quadrado (1:1 com cantos suaves), Retangular (3x4 clássico)
   let finalWidth = size;
   let finalHeight = size;
+  let outerRadius = '50%';
   let borderRadius = '50%';
 
   if (formato === 'quadrado') {
-    borderRadius = '14px';
+    outerRadius = '10px';
+    borderRadius = '6px';
   } else if (formato === 'retangular') {
     finalWidth = Math.round(size * 0.75); // Proporção 3x4
     finalHeight = size;
-    borderRadius = '10px';
+    outerRadius = '8px';
+    borderRadius = '4px';
   }
 
   // Estilização do Aro ao redor da foto
@@ -55,7 +58,7 @@ export default function ProfilePhotoView({
         height: totalHeight,
         minWidth: totalWidth,
         minHeight: totalHeight,
-        borderRadius: borderRadius,
+        borderRadius: outerRadius,
         border: temAro ? `3px solid ${ringColor}` : 'none',
         padding: temAro ? '3px' : 0,
         backgroundColor: temAro ? ringBg : 'transparent',
@@ -81,10 +84,11 @@ export default function ProfilePhotoView({
           backgroundColor: '#f1f5f9',
           border: temAro ? '1px solid rgba(0, 0, 0, 0.08)' : `3px solid ${ringColor}`,
           boxSizing: 'border-box',
-          position: 'relative'
+          position: 'relative',
+          isolation: 'isolate'
         }}
       >
-        {/* Imagem do perfil aplicada como Background com enquadramento e escala */}
+        {/* Imagem do perfil aplicada como Background (sem border-radius próprio para mover apenas a imagem) */}
         <div
           className="resume-profile-photo-bg"
           style={{
@@ -94,9 +98,9 @@ export default function ProfilePhotoView({
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            transform: `scale(${zoom}) translate(${x}%, ${y}%)`,
+            transform: `translate(${x}%, ${y}%) scale(${zoom})`,
             transformOrigin: 'center center',
-            borderRadius: borderRadius,
+            borderRadius: 0,
             transition: 'transform 0.1s ease-out'
           }}
         />

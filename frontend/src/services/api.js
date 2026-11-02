@@ -1,10 +1,88 @@
 import { DEFAULT_STEPS } from '../data/defaultSteps';
 import { RESUME_MODELS } from '../data/modelsData';
-import { SAMPLE_RESUME_DATA } from '../data/sampleResumeData';
 
 const API_BASE = '/api';
 
+function getAuthHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  try {
+    const stored = localStorage.getItem('curriculo_auth_user');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.token) {
+        headers['Authorization'] = `Bearer ${parsed.token}`;
+      }
+    }
+  } catch (e) {}
+  return headers;
+}
+
 export const apiService = {
+  // --- AUTENTICAÇÃO (LOGIN, CADASTRO E CONTA GOOGLE) ---
+  async register({ name, email, password }) {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Erro ao criar conta no servidor.');
+    }
+    return json;
+  },
+
+  async login({ email, password }) {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'E-mail ou senha incorretos.');
+    }
+    return json;
+  },
+
+  async googleAuth({ name, email, password, credential, avatar }) {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, credential, avatar })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Erro ao autenticar com a conta Google.');
+    }
+    return json;
+  },
+
+  async getMe() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.user) {
+          return json;
+        }
+      }
+    } catch (e) {}
+    return null;
+  },
+
+  async logout() {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+    } catch (e) {}
+  },
+
   // --- ETAPAS ---
   async getEtapas() {
     try {
@@ -29,7 +107,7 @@ export const apiService = {
       const method = etapa.id ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(etapa)
       });
       if (res.ok) {
@@ -54,7 +132,10 @@ export const apiService = {
 
   async deleteEtapa(id) {
     try {
-      const res = await fetch(`${API_BASE}/etapas/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/etapas/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
       if (res.ok) return true;
     } catch (e) {
       console.warn('Erro ao deletar etapa na API PHP:', e);
@@ -69,7 +150,7 @@ export const apiService = {
     try {
       const res = await fetch(`${API_BASE}/etapas/reorder`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ ordered_ids: orderedIds })
       });
       if (res.ok) {
@@ -110,12 +191,15 @@ export const apiService = {
     try {
       const res = await fetch(`${API_BASE}/curriculos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(curriculoData)
       });
       if (res.ok) {
         const json = await res.json();
-        return json.data;
+        if (json.success && json.data) {
+          localStorage.setItem('curriculo_saved_data', JSON.stringify(json.data));
+          return json.data;
+        }
       }
     } catch (e) {
       console.warn('Erro ao salvar currículo no servidor PHP, salvando no localStorage:', e);
@@ -124,7 +208,26 @@ export const apiService = {
     return curriculoData;
   },
 
-  async getCurriculoSalvo() {
+  async getCurriculoSalvo(user = null) {
+    try {
+      const params = new URLSearchParams();
+      if (user?.id) params.set('user_id', user.id);
+      if (user?.email) params.set('email', user.email);
+      const query = params.toString() ? `?${params.toString()}` : '';
+
+      const res = await fetch(`${API_BASE}/curriculos${query}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && !Array.isArray(json.data)) {
+          localStorage.setItem('curriculo_saved_data', JSON.stringify(json.data));
+          return json.data;
+        }
+      }
+    } catch (e) {}
+
     const saved = localStorage.getItem('curriculo_saved_data');
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
@@ -137,7 +240,7 @@ export const apiService = {
     try {
       const res = await fetch(`${API_BASE}/gerar-lattes-resumo`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ dados })
       });
       if (res.ok) {
@@ -147,7 +250,6 @@ export const apiService = {
     } catch (e) {
       console.warn('Erro ao gerar resumo no backend, gerando no cliente:', e);
     }
-    // Gerador client-side fallback
     const formacoes = dados.formacao_academica || [];
     const f0 = formacoes[0];
     let resumo = '';
