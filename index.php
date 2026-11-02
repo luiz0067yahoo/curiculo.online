@@ -41,6 +41,8 @@ if ($uri !== '/' && file_exists($staticFilePath) && !is_dir($staticFilePath)) {
 // 3. Servir frontend/dist/index.html para qualquer outra rota SPA
 if (file_exists($frontendDist . '/index.html')) {
     header("Content-Type: text/html; charset=UTF-8");
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
     readfile($frontendDist . '/index.html');
     exit();
 }

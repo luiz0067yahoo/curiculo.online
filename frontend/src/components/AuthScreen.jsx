@@ -36,18 +36,13 @@ export default function AuthScreen({
   const [googleCustomName, setGoogleCustomName] = useState('');
   const [googleCustomEmail, setGoogleCustomEmail] = useState('');
 
-  // Limpeza preventiva de contas mock salvas anteriormente
+  // Limpeza preventiva de contas de exemplo salvas anteriormente
   useEffect(() => {
     try {
       const storedGoogle = localStorage.getItem('curriculo_google_user');
       if (storedGoogle) {
         const parsed = JSON.parse(storedGoogle);
-        if (
-          parsed?.name === 'Dr. Leonardo Albuquerque Silveira' || 
-          parsed?.name === 'Dra. Camila Vasconcelos Mendes' ||
-          parsed?.email === 'leonardo.silveira@usp.br' ||
-          parsed?.email === 'camila.mendes@cnpq.br'
-        ) {
+        if (parsed?.avatar?.includes('images.unsplash.com')) {
           localStorage.removeItem('curriculo_google_user');
           localStorage.removeItem('curriculo_auth_user');
         }
@@ -277,7 +272,7 @@ export default function AuthScreen({
                   <input
                     type="text"
                     className="form-control with-icon"
-                    placeholder="Ex: Dra. Juliana Fernandes Costa"
+                    placeholder="Digite seu nome completo"
                     value={nome}
                     onChange={e => setNome(e.target.value)}
                     required

@@ -19,10 +19,10 @@ export default function App() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (
-          parsed?.name === 'Dr. Leonardo Albuquerque Silveira' || 
-          parsed?.name === 'Dra. Camila Vasconcelos Mendes' ||
-          parsed?.email === 'leonardo.silveira@usp.br' ||
-          parsed?.email === 'camila.mendes@cnpq.br'
+          parsed?.avatar?.includes('images.unsplash.com') || 
+          parsed?.email === 'mock@example.com'
+
+
         ) {
           localStorage.removeItem('curriculo_auth_user');
           localStorage.removeItem('curriculo_google_user');
@@ -63,7 +63,7 @@ export default function App() {
       // Carregar currículo salvo previamente se existir
       const savedCurriculo = await apiService.getCurriculoSalvo();
       if (savedCurriculo && savedCurriculo.dados) {
-        const isOldSample = savedCurriculo.dados?.dados_basicos?.nome === 'Dr. Leonardo Albuquerque Silveira';
+        const isOldSample = savedCurriculo.dados?.identificadores_lattes?.id_lattes === '8492019384756102';
         if (!isOldSample) {
           setFormData(savedCurriculo.dados);
           if (savedCurriculo.modelo_slug) setSelectedModelSlug(savedCurriculo.modelo_slug);

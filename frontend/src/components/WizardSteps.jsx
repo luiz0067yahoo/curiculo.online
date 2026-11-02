@@ -256,7 +256,7 @@ export default function WizardSteps({
               <input
                 type="text"
                 className="form-control"
-                placeholder="Ex: Dr. Leonardo Albuquerque Silveira"
+                placeholder="Digite seu nome completo"
                 value={formData.dados_basicos?.nome || ''}
                 onChange={e => handleChange('dados_basicos', 'nome', e.target.value)}
               />
@@ -416,7 +416,7 @@ export default function WizardSteps({
               <input
                 type="text"
                 className="form-control"
-                placeholder="Ex: SILVEIRA, L. A.; SILVEIRA, Leonardo A."
+                placeholder="Ex: SOBRENOME, N. M.; SOBRENOME, Nome"
                 value={formData.identificadores_lattes?.citacoes_bibliograficas || ''}
                 onChange={e => handleChange('identificadores_lattes', 'citacoes_bibliograficas', e.target.value)}
               />
@@ -852,7 +852,7 @@ export default function WizardSteps({
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="SILVEIRA, L. A.; MOURA, C. E."
+                      placeholder="SOBRENOME, N.; SOBRENOME, A."
                       value={item.autores || ''}
                       onChange={e => handleArrayChange('producao_bibliografica', idx, 'autores', e.target.value)}
                     />
